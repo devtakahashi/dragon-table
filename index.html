@@ -1,31 +1,12 @@
-<!doctype html>
-<html lang="zh-Hans">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#140908">
-<meta name="description" content="Dragon Table 龙桌 — 五张牌，只有一张藏着龙。">
-<title>龙桌 · Dragon Table</title>
-<link rel="icon" href="./dragon-avatar.png" type="image/png">
-<link rel="stylesheet" href="./styles.css">
-<script src="./app.js" defer></script>
-</head>
-<body>
-<header class="header">
-<a class="brand" href="./" aria-label="Dragon Table"><img src="./dragon-avatar.png" alt="" width="56" height="56"><strong>龙桌</strong><span>DRAGON TABLE</span></a>
-<nav aria-label="Main navigation"><a href="#game" class="active" data-text="play">开始游戏</a><button class="plain" data-help data-text="how">玩法说明</button></nav>
-<button id="language" class="language">English</button>
-</header>
-<main id="game">
-<div class="intro"><h1 data-text="title">寻龙</h1><div class="ornament" aria-hidden="true"><i></i><b>◆</b><i></i></div><p data-text="tagline">五张牌，只有一张藏着龙。</p></div>
-<div class="mode-switch" role="group" aria-label="游戏模式"><button id="duel-mode" aria-pressed="true" data-text="duel">双人对决</button><button id="solo-mode" aria-pressed="false" data-text="solo">单人练习</button></div>
-<div class="match-info" id="match-info"><span class="player"><span aria-hidden="true">♙</span><span data-text="you">你</span></span><span id="entry"></span><span id="pot"></span><span class="player"><span aria-hidden="true">♙</span><span data-text="opponent">对手</span></span></div>
-<p id="phase" class="phase" role="status" aria-live="polite"></p>
-<section class="table" aria-label="Cards"><div id="cards" class="cards"></div></section>
-<div class="controls"><button id="action" class="primary" disabled data-text="lock">锁定选牌</button><p id="hint" class="hint"></p><button class="plain mobile-help" data-help data-text="how">玩法说明</button></div>
-<p class="demo-note" data-text="demo">本地试玩 · 演示金额 · 无需充值</p>
-</main>
-<dialog id="help"><button class="close" id="close-help" aria-label="关闭">×</button><h2 data-text="how">玩法说明</h2><div id="rules"></div><button id="help-done" class="primary" data-text="understood">明白了</button></dialog>
-<dialog id="handoff"><h2 data-text="passTitle">轮到玩家二</h2><p data-text="passBody">请把设备交给玩家二。已选中的牌不能再次选择。</p><button id="ready" class="primary" data-text="ready">玩家二就绪</button></dialog>
-</body>
-</html>
+<!doctype html><html lang="zh-Hans"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#100402"><title>龙桌 · 寻龙</title><link rel="icon" href="dragon-avatar.png"><link rel="stylesheet" href="styles.css"><script defer src="app.js"></script></head><body>
+<div class="scene"><div class="lantern left"></div><div class="lantern right"></div>
+<header><a class="brand" href="./"><img src="dragon-avatar.png" alt=""><span>龙桌</span></a><a class="rules-link" href="rules.html">玩法说明</a><button id="wallet" class="wallet" aria-label="连接钱包"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20 8V5H5a2 2 0 0 1 0-4h14v4M3 3v16a2 2 0 0 0 2 2h15V8H5a2 2 0 0 1-2-2"/><path d="M20 12h-6v5h6M16 14.5h1"/></svg><span id="wallet-label">连接钱包</span></button></header>
+<main><div class="intro"><p class="eyebrow">龙隐五牌 · 一翻见分晓</p><h1>寻龙</h1><div class="ornament">◆</div><p>五张牌，只有一张藏着龙。</p></div>
+<div class="mode-switch"><button id="solo" aria-pressed="true">单人试玩</button><button id="duel" aria-pressed="false">双人对决</button></div>
+<div class="stake-row"><label for="stake">演示下注</label><div class="amount"><input id="stake" type="number" min="0.01" max="1000000" step="0.01" value="5" inputmode="decimal"><span>USDC</span></div></div>
+<p id="phase" role="status" aria-live="polite">请选择一张牌</p>
+<section class="table" aria-label="五张游戏牌"><div id="cards" class="cards"></div><div id="celebration" aria-hidden="true"></div></section>
+<div class="controls"><button id="action" class="primary" disabled>确认下注</button><p id="result" aria-live="polite">选牌后确认，揭晓你的运气。</p><p class="demo">试玩模式 · 不扣款 · 不产生真实奖金</p></div></main></div>
+<footer><a href="privacy.html">隐私政策</a><a href="terms.html">服务条款</a><a href="rules.html">游戏规则</a><a href="responsible.html">理性游戏 · 18+</a><a href="support.html">帮助与支持</a><p>© 龙桌 · 寻龙</p></footer>
+<dialog id="wallet-dialog"><button class="close" aria-label="关闭">×</button><h2>连接钱包</h2><p>当前为界面试玩。钱包交易尚未开放，不会请求签名或扣款。</p><p>你可以直接体验选牌和揭晓动画。</p><button class="primary close-wallet">继续试玩</button></dialog>
+</body></html>
