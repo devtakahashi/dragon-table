@@ -1,17 +1,13 @@
-# Dragon Table update
+# Dragon Table account update
 
-Upload every file from this ZIP to the repository root, replacing the previous files. Keep the existing five PNG assets. card-cat.png is new and REQUIRED.
+Chinese account modal with Jupiter, Phantom, Solflare and Backpack logo buttons in one row, original dragon watermark, SOL balance, and current-page demo counters. Responsive mobile/tablet/desktop layouts.
 
-Cloudflare build command:
-```
-mkdir -p public && cp *.html styles.css app.js *.png public/
-```
-Keep the existing deploy command. The existing older build command also includes the new cat image and app bundle; footer information is bundled into app.js so it works independently of separate-page deployment.
+Wallet Standard discovery supports compatible installed wallets, with injected-provider fallbacks for Phantom, Solflare and Backpack. No transaction or signature calls. Mobile users need a compatible wallet browser; cross-app QR/deep-link pairing is not included. Real wallet/device approval remains to be checked. Public Solana RPC may rate-limit; failure displays a Chinese message.
 
-Changes: three-second reveal, explicit WebKit backface rules, two-pass shuffle, cat special card (one dragon, one cat, three misses), embedded information pages, preview invitation links, Phantom public-address connection, account panel, read-only mainnet SOL balance with failure state. Open inside Phantom's in-app browser on mobile. No transaction or signature requests.
+Validated: JavaScript syntax; all local HTML/CSS assets; browser layout at mobile 390px, tablet 768px and desktop; double shuffle (two iterations); reveal animation and completion; all five Chinese modal page links; simulated Standard/legacy connection, rejection, account removal, reconnection, disconnect, balance and stats.
 
-Limitations: not a funded casino. Invite URLs are editable preview data, not authenticated rooms. No opponent synchronization, acceptance persistence, escrow, deposits, payouts or real earnings history. Demo stats last for the current page only and are not wallet-specific financial records. Displayed SOL balance is separate from the illustrative USDC stake. Public RPC may rate-limit requests; unavailable balance is shown honestly.
+Real iPhone Safari rendering and real wallet extensions/apps were not available for verification. Funded duels, escrow, payout rules and persistent wallet history remain unfinished.
 
-Production decisions needed: chain/token, cat and dragon payout rules, duel tie/miss rules, cancellation/expiry and settlement implementation. A shared backend and secure escrow are required before funded duels.
+Upload all files including assets/ to your existing static deployment, or copy into the repository root. GitHub and production were not changed: connected repository access is read-only.
 
-Verification: JavaScript syntax and deterministic local interaction checks. Physical mobile devices and a real wallet were not available for live validation.
+Wallet icons sourced from the official wallet adapter packages (@jup-ag/jup-mobile-adapter, @solana/wallet-adapter-backpack, anza-xyz/wallet-adapter). Brand assets retain their respective ownership.
