@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#140908">
+<meta name="description" content="Dragon Table 龙桌 — 五张牌，只有一张藏着龙。">
+<title>龙桌 · Dragon Table</title>
+<link rel="icon" href="./dragon-avatar.png" type="image/png">
+<link rel="stylesheet" href="./styles.css">
+<script src="./app.js" defer></script>
+</head>
+<body>
+<header class="header">
+<a class="brand" href="./" aria-label="Dragon Table"><img src="./dragon-avatar.png" alt="" width="56" height="56"><strong>龙桌</strong><span>DRAGON TABLE</span></a>
+<nav aria-label="Main navigation"><a href="#game" class="active" data-text="play">开始游戏</a><button class="plain" data-help data-text="how">玩法说明</button></nav>
+<button id="language" class="language">English</button>
+</header>
+<main id="game">
+<div class="intro"><h1 data-text="title">寻龙</h1><div class="ornament" aria-hidden="true"><i></i><b>◆</b><i></i></div><p data-text="tagline">五张牌，只有一张藏着龙。</p></div>
+<div class="mode-switch" role="group" aria-label="游戏模式"><button id="duel-mode" aria-pressed="true" data-text="duel">双人对决</button><button id="solo-mode" aria-pressed="false" data-text="solo">单人练习</button></div>
+<div class="match-info" id="match-info"><span class="player"><span aria-hidden="true">♙</span><span data-text="you">你</span></span><span id="entry"></span><span id="pot"></span><span class="player"><span aria-hidden="true">♙</span><span data-text="opponent">对手</span></span></div>
+<p id="phase" class="phase" role="status" aria-live="polite"></p>
+<section class="table" aria-label="Cards"><div id="cards" class="cards"></div></section>
+<div class="controls"><button id="action" class="primary" disabled data-text="lock">锁定选牌</button><p id="hint" class="hint"></p><button class="plain mobile-help" data-help data-text="how">玩法说明</button></div>
+<p class="demo-note" data-text="demo">本地试玩 · 演示金额 · 无需充值</p>
+</main>
+<dialog id="help"><button class="close" id="close-help" aria-label="关闭">×</button><h2 data-text="how">玩法说明</h2><div id="rules"></div><button id="help-done" class="primary" data-text="understood">明白了</button></dialog>
+<dialog id="handoff"><h2 data-text="passTitle">轮到玩家二</h2><p data-text="passBody">请把设备交给玩家二。已选中的牌不能再次选择。</p><button id="ready" class="primary" data-text="ready">玩家二就绪</button></dialog>
+</body>
+</html>
