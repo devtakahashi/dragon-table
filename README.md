@@ -13,3 +13,5 @@ Upload all files including assets/ to your existing static deployment, or copy i
 Wallet icons sourced from the official wallet adapter packages (@jup-ag/jup-mobile-adapter, @solana/wallet-adapter-backpack, anza-xyz/wallet-adapter). Brand assets retain their respective ownership.
 
 Account revision 2: removed account title and separate connect button; tapping a wallet logo starts connection. Wallet logos embedded in HTML to avoid missing asset-folder uploads. Four decorative Chinese gold corners added. Verified logo decoding, title/button removal and direct selection feedback in a 390px browser layout.
+
+Revision 3: compact approved layout, selected logo plus explicit Connect Wallet confirmation, embedded logos and gold corners, balance row and three demo counters. Removes unavailable returns and empty history. Phantom, Solflare, Backpack mobile browse links preserve selected wallet; press Connect again inside wallet browser to authorize. Jupiter separate mobile pairing remains unfinished; compatible Wallet Standard provider supported. Mobile app handoff requires real-device validation.
