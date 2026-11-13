@@ -1,24 +1,17 @@
-# 龙桌 · Dragon Table
+# Dragon Table update
 
-Chinese-only static UI demo. No real wagers, deposits, wallet connection or payouts. The wallet control opens an accurate availability notice. Solo mode works; online duel is visibly unavailable. Production payout rules are not yet specified.
+Upload every file from this ZIP to the repository root, replacing the previous files. Keep the existing five PNG assets. card-cat.png is new and REQUIRED.
 
-## Deployment
-Upload all files from this update to the repository root, retaining the existing five PNG assets.
-
-Update the Cloudflare build command so the new pages are included:
-
-```sh
+Cloudflare build command:
+```
 mkdir -p public && cp *.html styles.css app.js *.png public/
 ```
+Keep the existing deploy command. The existing older build command also includes the new cat image and app bundle; footer information is bundled into app.js so it works independently of separate-page deployment.
 
-Deploy command:
+Changes: three-second reveal, explicit WebKit backface rules, two-pass shuffle, cat special card (one dragon, one cat, three misses), embedded information pages, preview invitation links, Phantom public-address connection, account panel, read-only mainnet SOL balance with failure state. Open inside Phantom's in-app browser on mobile. No transaction or signature requests.
 
-```sh
-npx wrangler deploy --name dragon-table --assets ./public --compatibility-date 2026-11-10
-```
+Limitations: not a funded casino. Invite URLs are editable preview data, not authenticated rooms. No opponent synchronization, acceptance persistence, escrow, deposits, payouts or real earnings history. Demo stats last for the current page only and are not wallet-specific financial records. Displayed SOL balance is separate from the illustrative USDC stake. Public RPC may rate-limit requests; unavailable balance is shown honestly.
 
-## Interaction
-Select a card, enter a positive amount (up to 1,000,000 with two decimals), and confirm. A ten-second animation reveals the card. One of five cards contains a dragon. Browser randomness is for demo only and is not secure settlement. Win displays the entered demo amount, explicitly not a payout. Reduced-motion preferences suppress spinning and effects while retaining the reveal wait.
+Production decisions needed: chain/token, cat and dragon payout rules, duel tie/miss rules, cancellation/expiry and settlement implementation. A shared backend and secure escrow are required before funded duels.
 
-## Before production
-Confirm solo/duel mechanics, payout multiplier, chain/token, backend randomness, escrow, authentication and settlement. Replace informational demo policies with reviewed operator-specific policies, jurisdiction eligibility and a working support contact. Do not remove demo notices before these are implemented.
+Verification: JavaScript syntax and deterministic local interaction checks. Physical mobile devices and a real wallet were not available for live validation.
