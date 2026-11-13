@@ -30,7 +30,7 @@ function getProvider(id){
 }
 function account(){
  el('wallet-label').textContent=address?'我的账户':'连接钱包';el('wallet').setAttribute('aria-label',address?'我的账户':'连接钱包');
- el('address').textContent=address||'选择钱包，开启寻龙之旅';el('connect').hidden=!!address;el('disconnect').hidden=!address;
+ el('address').textContent=address||'选择钱包，开启寻龙之旅';el('connect').hidden=true;el('disconnect').hidden=!address;
  el('balance').textContent=address?'查询中…':'尚未连接';if(address)loadBalance(address);
  el('dragon-wins').textContent=window.demoStats.dragon;el('cat-wins').textContent=window.demoStats.cat;el('losses').textContent=window.demoStats.loss;
  const total=Object.values(window.demoStats).reduce((a,b)=>a+b,0);el('activity-summary').textContent=total?`本次已试玩 ${total} 轮 · 刷新页面后重置`:'还没有试玩记录，去翻开第一张牌吧。';
@@ -45,7 +45,7 @@ async function connect(){
  catch{el('wallet-message').textContent='连接未完成，请在钱包中确认后重试。';return false}
  finally{busy=false;el('connect').disabled=false;el('connect').textContent='连接钱包';account()}
 }
- document.querySelectorAll('[data-wallet]').forEach(b=>b.addEventListener('click',()=>{if(busy||address)return;selectedWallet=b.dataset.wallet;el('wallet-message').textContent=`已选择 ${names[selectedWallet]} · 只连接地址，不请求签名或转账。`;account()}));
+ document.querySelectorAll('[data-wallet]').forEach(b=>b.addEventListener('click',()=>{if(busy||address)return;selectedWallet=b.dataset.wallet;el('wallet-message').textContent=`正在连接 ${names[selectedWallet]}…`;account();connect()}));
  el('wallet').addEventListener('click',()=>{account();el('wallet-dialog').showModal()});el('connect').addEventListener('click',connect);
  el('disconnect').addEventListener('click',async()=>{if(busy)return;busy=true;el('disconnect').disabled=true;try{await provider?.disconnect();unsubscribe();provider=null;address=null;el('wallet-message').textContent='钱包已断开，可选择其他钱包。'}catch{el('wallet-message').textContent='断开失败，请在钱包中断开连接。'}finally{busy=false;el('disconnect').disabled=false;account()}});
  document.querySelectorAll('dialog .close').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));

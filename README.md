@@ -11,3 +11,5 @@ Real iPhone Safari rendering and real wallet extensions/apps were not available 
 Upload all files including assets/ to your existing static deployment, or copy into the repository root. GitHub and production were not changed: connected repository access is read-only.
 
 Wallet icons sourced from the official wallet adapter packages (@jup-ag/jup-mobile-adapter, @solana/wallet-adapter-backpack, anza-xyz/wallet-adapter). Brand assets retain their respective ownership.
+
+Account revision 2: removed account title and separate connect button; tapping a wallet logo starts connection. Wallet logos embedded in HTML to avoid missing asset-folder uploads. Four decorative Chinese gold corners added. Verified logo decoding, title/button removal and direct selection feedback in a 390px browser layout.
