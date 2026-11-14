@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#100402" />
     <title>龙桌 · 寻龙</title>
     <link rel="icon" href="dragon-avatar.webp" />
-    <link rel="stylesheet" href="styles.css?v=auto-webp-6" />
-    <script defer src="app.js?v=auto-webp-6"></script>
+    <link rel="stylesheet" href="styles.css?v=invite-7" />
+    <script defer src="app.js?v=invite-7"></script>
     <link rel="preload" as="image" type="image/webp" href="card-cat.webp" />
     <link rel="preload" as="image" type="image/webp" href="card-dragon.webp" />
   </head>
@@ -213,19 +213,22 @@
       <p class="account-footnote">试玩记录刷新后重置</p>
       <button id="disconnect" class="invite" hidden>断开连接</button>
     </dialog>
-    <dialog id="invite-dialog">
+    <dialog id="invite-dialog" aria-labelledby="invite-title">
       <button class="close" aria-label="关闭">×</button>
-      <h2>好友对决 · 预览</h2>
-      <p id="invite-summary"></p>
-      <p>此链接仅演示邀请流程，不创建真实赌局，不接受充值。</p>
-      <input id="invite-link" readonly aria-label="邀请链接" /><button
-        id="copy-invite"
-        class="primary"
-      >
-        复制邀请链接</button
-      ><button id="accept-invite" class="primary" hidden>
-        接受邀请并连接钱包
-      </button>
+      <div class="invite-crest" aria-hidden="true">◆</div>
+      <p class="invite-kicker">龙桌 · 对决预览</p>
+      <h2 id="invite-title">好友对决邀请</h2>
+      <p id="invite-host" class="invite-host" hidden></p>
+      <div class="invite-amount"><span>每人试玩金额</span><strong id="invite-summary"></strong></div>
+      <div id="invite-share">
+        <label for="invite-name">邀请昵称 <small>选填 · 字母、数字或连字符</small></label>
+        <input id="invite-name" type="text" placeholder="例如 enyinnaya" maxlength="20" autocomplete="off" spellcheck="false" />
+        <label for="invite-link">分享链接</label>
+        <input id="invite-link" readonly aria-label="邀请链接" />
+        <button id="copy-invite" class="primary">复制邀请链接</button>
+      </div>
+      <button id="accept-invite" class="primary" hidden>接受邀请并连接钱包</button>
+      <p class="invite-note">仅供试玩预览 · 无需充值，不会扣款</p>
       <p id="invite-status" role="status"></p>
     </dialog>
     <dialog id="page-dialog">

@@ -105,14 +105,40 @@ function reset() {
   } while (cat === dragon);
   cards.forEach((b) => {
     b.classList.remove("spinning", "revealed");
+    delete b.dataset.win;
     b.setAttribute("aria-label", `第${cards.indexOf(b) + 1}张牌`);
     b.querySelector(".face").replaceChildren();
   });
   $("celebration").replaceChildren();
+  $("celebration").hidden = true;
   $("result").className = "";
   $("result").textContent = "选牌后确认，揭晓你的运气。";
   render();
 }
+function celebrateWin(card, kind) {
+  const layer = $("celebration");
+  card.dataset.win = kind;
+  layer.hidden = false;
+  layer.dataset.win = kind;
+  const bounds = layer.getBoundingClientRect();
+  const box = card.getBoundingClientRect();
+  const x = box.left - bounds.left + box.width / 2;
+  const y = box.top - bounds.top + box.height / 2;
+  layer.style.setProperty("--win-x", `${x}px`);
+  layer.style.setProperty("--win-y", `${y}px`);
+
+  for (let i = 0; i < 16; i++) {
+    const particle = document.createElement("i");
+    const angle = (i / 16) * Math.PI * 2;
+    const radius = Math.min(110, bounds.width * 0.27) * (0.65 + (i % 3) * 0.17);
+    layer.append(particle);
+    animateCard(particle, [
+      { transform: "translate(0, 0) scale(0.5)", opacity: 1 },
+      { transform: `translate(${Math.cos(angle) * radius}px, ${Math.sin(angle) * radius}px) rotate(200deg)`, opacity: 0 }
+    ], { duration: 1050 + (i % 4) * 110, easing: "ease-out" });
+  }
+}
+
 $("stake").addEventListener("input", render);
 $("action").addEventListener("click", () => {
   if (phase === "done") {
@@ -152,13 +178,7 @@ $("action").addEventListener("click", () => {
       $("result").className = "win";
       $("result").textContent =
         `${selected === cat ? "遇见猫师傅！" : "寻龙成功！"}演示金额 ${stake.toFixed(2)} USDC · 奖金倍率待定`;
-      for (let j = 0; j < 30; j++) {
-        let s = document.createElement("i");
-        s.style.setProperty("--x", `${Math.cos(j) * 300}px`);
-        s.style.setProperty("--y", `${Math.sin(j) * 180}px`);
-        s.style.setProperty("--r", `${j * 12}deg`);
-        $("celebration").append(s);
-      }
+      celebrateWin(b, isCat ? "cat" : "dragon");
     } else {
       window.demoStats.loss++;
       face.innerHTML = '<b aria-hidden="true">😭</b><small>与龙擦肩</small>';
@@ -179,7 +199,7 @@ $("action").addEventListener("click", () => {
         : "空牌，与龙擦肩",
     );
     render();
-    $("action").focus();
+    $("action").focus({ preventScroll: true });
   }, 3000);
 });
 for (const m of ["solo", "duel"])
@@ -448,33 +468,40 @@ reset();
     .forEach((b) =>
       b.addEventListener("click", () => b.closest("dialog").close()),
     );
+  const inviteName = el("invite-name");
+  const nicknamePattern = /^[a-z0-9][a-z0-9-]{0,19}$/;
+  let inviteAmount = 0;
   function summary(amount) {
-    el("invite-summary").textContent =
-      `邀请金额：每人 ${amount.toFixed(2)} USDC（预览）`;
+    el("invite-summary").textContent = `${amount.toFixed(2)} USDC`;
     el("invite-status").textContent = "";
   }
+  function updateInviteLink() {
+    const nickname = inviteName.value.trim().toLowerCase();
+    const validNickname = !nickname || nicknamePattern.test(nickname);
+    el("copy-invite").disabled = !validNickname;
+    el("invite-status").textContent = validNickname ? "" : "请使用 1–20 个字母、数字或连字符，首位须为字母或数字。";
+    if (!validNickname) {
+      el("invite-link").value = "";
+      return;
+    }
+    const url = new URL(location.pathname, location.origin);
+    const amountCode = Math.round(inviteAmount * 100).toString(36);
+    url.hash = `invite=${nickname ? nickname + "." : ""}${amountCode}`;
+    el("invite-link").value = url.href;
+  }
+  inviteName.addEventListener("input", updateInviteLink);
   el("invite").addEventListener("click", () => {
-    const n = Number(el("stake").value);
-    if (
-      !Number.isFinite(n) ||
-      n < 0.01 ||
-      n > 1000000 ||
-      Math.abs(n * 100 - Math.round(n * 100)) > 0.00001
-    ) {
+    if (!valid()) {
       el("phase").textContent = "请先输入有效金额";
       return;
     }
-    const u = new URL(location.href);
-    u.hash = "";
-    u.search = "";
-    u.searchParams.set("invite", crypto.randomUUID());
-    u.searchParams.set("amount", n.toFixed(2));
-    u.searchParams.set("preview", "1");
-    el("invite-link").value = u.href;
-    el("invite-link").hidden = false;
-    el("copy-invite").hidden = false;
+    inviteAmount = Number(el("stake").value);
+    el("invite-title").textContent = "好友对决邀请";
+    el("invite-host").hidden = true;
+    el("invite-share").hidden = false;
     el("accept-invite").hidden = true;
-    summary(n);
+    summary(inviteAmount);
+    updateInviteLink();
     el("invite-dialog").showModal();
   });
   el("copy-invite").addEventListener("click", async () => {
@@ -501,31 +528,35 @@ reset();
     el("wallet-dialog").showModal();
     el("wallet-message").textContent = "请点击连接钱包，在钱包中确认授权。";
   }
-  if (q.has("invite")) {
-    const n = Number(q.get("amount"));
-    if (
-      q.get("preview") === "1" &&
-      /^[a-f0-9-]{36}$/.test(q.get("invite")) &&
-      Number.isFinite(n) &&
-      n >= 0.01 &&
-      n <= 1000000 &&
-      Math.abs(n * 100 - Math.round(n * 100)) < 0.00001
-    ) {
-      summary(n);
-      el("invite-link").hidden = true;
-      el("copy-invite").hidden = true;
-      el("accept-invite").hidden = false;
-      el("invite-dialog").showModal();
-    } else {
-      el("phase").textContent = "邀请链接无效";
+  function openSharedInvite(includeLegacy = false) {
+    const shortInvite = new URLSearchParams(location.hash.slice(1)).get("invite");
+    const shortMatch = shortInvite?.match(/^(?:([a-z0-9][a-z0-9-]{0,19})\.)?([a-z0-9]{1,6})$/);
+    const legacyInvite = q.get("preview") === "1" && /^[a-f0-9-]{36}$/.test(q.get("invite") || "");
+    if (shortInvite !== null || (includeLegacy && q.has("invite"))) {
+      const n = shortMatch ? parseInt(shortMatch[2], 36) / 100 : legacyInvite ? Number(q.get("amount")) : NaN;
+      if (Number.isFinite(n) && n >= 0.01 && n <= 1000000 &&
+          Math.abs(n * 100 - Math.round(n * 100)) < 0.00001) {
+        summary(n);
+        const host = shortMatch?.[1];
+        el("invite-title").textContent = "你已受邀对决";
+        el("invite-host").hidden = !host;
+        el("invite-host").textContent = host ? `邀请人 · ${host}` : "";
+        el("invite-share").hidden = true;
+        el("accept-invite").hidden = false;
+        if (!el("wallet-dialog").open && !el("invite-dialog").open) el("invite-dialog").showModal();
+      } else {
+        el("phase").textContent = "邀请链接无效";
+      }
     }
   }
+  openSharedInvite(true);
+  window.addEventListener("hashchange", () => openSharedInvite());
 })();
 
 (() => {
   const pages = {
     privacy:
-      '<h1>隐私政策</h1><p class="notice">试玩版本说明 · 更新于 2026 年 11 月 13 日</p><h2>当前试玩版本</h2><p>选牌、演示金额和结果仅在当前页面内存中处理，刷新页面后重置。本站代码不设置分析追踪、不使用本地存储保存游戏记录，不向本站服务器提交钱包地址。</p><h2>网站访问</h2><p>网站由 Cloudflare 提供托管及网络服务。提供网页和保护服务所需的技术信息（例如 IP 地址、请求信息及设备信息）可能由服务提供商处理，具体以其政策为准。</p><h2>钱包与后续更新</h2><p>在你主动批准后，本站可通过 Jupiter、Phantom、Solflare 或 Backpack 获取公开钱包地址，用于页面显示和向 Solana 公共 RPC 请求 SOL 余额。RPC 提供商会接收地址和网络请求信息。本站不请求交易或签名。钱包服务商处理连接请求，适用其自身政策。邀请预览的金额和随机标识包含在分享链接中。真实账户、支付或数据收集启用前，将更新本政策并说明用途、保存期限及用户联系渠道。</p>',
+      '<h1>隐私政策</h1><p class="notice">试玩版本说明 · 更新于 2026 年 11 月 13 日</p><h2>当前试玩版本</h2><p>选牌、演示金额和结果仅在当前页面内存中处理，刷新页面后重置。本站代码不设置分析追踪、不使用本地存储保存游戏记录，不向本站服务器提交钱包地址。</p><h2>网站访问</h2><p>网站由 Cloudflare 提供托管及网络服务。提供网页和保护服务所需的技术信息（例如 IP 地址、请求信息及设备信息）可能由服务提供商处理，具体以其政策为准。</p><h2>钱包与后续更新</h2><p>在你主动批准后，本站可通过 Jupiter、Phantom、Solflare 或 Backpack 获取公开钱包地址，用于页面显示和向 Solana 公共 RPC 请求 SOL 余额。RPC 提供商会接收地址和网络请求信息。本站不请求交易或签名。钱包服务商处理连接请求，适用其自身政策。邀请预览的金额及可选昵称包含在分享链接中，收到链接的人可以看到它们。真实账户、支付或数据收集启用前，将更新本政策并说明用途、保存期限及用户联系渠道。</p>',
     terms:
       '<h1>服务条款</h1><p class="notice">试玩版本说明 · 更新于 2026 年 11 月 13 日</p><h2>服务范围</h2><p>龙桌当前提供免费的浏览器游戏界面试玩。演示金额不是资产、余额或奖金，不可充值、提现、兑换或转让。</p><h2>使用条件</h2><p>本体验仅面向年满 18 周岁的用户。请遵守你所在地适用的规则。不得利用本站攻击系统、干扰其他用户或冒充运营方。</p><h2>结果与可用性</h2><p>试玩结果在浏览器内产生，可被本地修改，不构成可验证的真实资金游戏。服务可能调整或暂停。本站不承诺任何收益。</p><h2>正式服务</h2><p>真实资金功能尚未开放。运营主体、适用地区、支付、争议处理与正式服务条款仍需确定。</p>',
     rules:
