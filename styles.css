@@ -1391,3 +1391,85 @@ input[hidden] {
 .feature-box dd { margin:0; text-align:right; font-weight:600; }
 .receipt-label { display:block; text-align:left; margin:14px 0 4px; }
 .feature-panel input { width:100%; box-sizing:border-box; font:inherit; padding:10px; color:#ffe1a0; background:#1e0a05; border:1px solid #956d35; }
+
+/* Gold framing and carved details shared by the section previews. */
+.scene {
+  --frame-gold: #dba958;
+  --frame-inlay: #9b652c;
+  --frame-corner:
+    linear-gradient(var(--frame-gold), var(--frame-gold)) 0 0 / 18px 2px,
+    linear-gradient(var(--frame-gold), var(--frame-gold)) 0 0 / 2px 18px,
+    linear-gradient(var(--frame-inlay), var(--frame-inlay)) 5px 5px / 13px 1px,
+    linear-gradient(var(--frame-inlay), var(--frame-inlay)) 5px 5px / 1px 13px,
+    linear-gradient(var(--frame-gold), var(--frame-gold)) 9px 9px / 9px 1px,
+    linear-gradient(var(--frame-gold), var(--frame-gold)) 9px 9px / 1px 9px;
+}
+.scene > header { position: relative; }
+.scene > header::before,
+.scene > header::after,
+.feature-panel::before,
+.feature-panel::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: var(--frame-corner);
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.scene > header::before { top: 7px; left: 7px; }
+.scene > header::after { top: 7px; right: 7px; transform: scaleX(-1); }
+.scene #wallet,
+.section-tabs,
+.feature-panel .primary {
+  border: 1px solid var(--frame-gold);
+  border-radius: 9px 3px;
+  box-shadow: inset 0 0 0 2px #170905, inset 0 0 0 3px #916530;
+}
+.scene #wallet {
+  color: #ffe1a0;
+  background: linear-gradient(180deg, #3c2110, #100503);
+}
+.section-tabs {
+  gap: 0;
+  background: linear-gradient(#281209, #130704);
+}
+.section-tabs button + button { border-left: 1px solid #865229; }
+.section-tabs [aria-selected="true"],
+.feature-panel .primary {
+  background: linear-gradient(#9a2916, #631108 48%, #2e0804);
+}
+.feature-panel:not([hidden]) {
+  position: relative;
+  width: min(430px, calc(100% - 24px));
+  box-sizing: border-box;
+  padding: 24px clamp(14px, 4vw, 24px) 28px;
+  border: 1px solid #926132;
+  background: linear-gradient(#220c0888, #160603e8);
+  box-shadow: inset 0 0 0 3px #1e0b06, inset 0 0 0 4px #715026;
+  animation: section-arrive 220ms ease-out;
+}
+.feature-panel::before { bottom: 7px; left: 7px; transform: scaleY(-1); }
+.feature-panel::after { bottom: 7px; right: 7px; transform: scale(-1); }
+.feature-panel h1 { font-family: "Songti SC", SimSun, serif; font-size: clamp(26px, 6vw, 36px); }
+.feature-panel .eyebrow { color: #f0bd78; }
+.flip-wheel {
+  width: min(300px, 100%);
+  border: 9px double #e1a94e;
+  box-shadow: inset 0 0 0 1px #f0ce8d, 0 0 24px #bc6b3d66;
+}
+.flip-dragon { background: radial-gradient(ellipse at top, #89521f, #2f1505); }
+.flip-dragon img { width: clamp(50px, 19vw, 90px); height: auto; aspect-ratio: 1; }
+.flip-fire { background: radial-gradient(ellipse at bottom, #96231a, #410900); }
+.flip-fire span { font-size: clamp(28px, 10vw, 49px); }
+.flip-half b { padding: 2px 9px; border: 1px solid #b78340; border-radius: 6px 2px; background: #230b04; }
+.flip-divider { background: linear-gradient(#fff1ae, #ad6325, #ffd28b); }
+#flip-pointer { background: linear-gradient(#ffedb6, #e1a047); }
+.feature-box { border: 3px double #c89655; border-radius: 10px 3px; }
+.feature-box h2 { margin-top: 0; color: #ffda8b; font-size: 18px; }
+.feature-box dl div:last-child { color: #ffda8b; background: #6b1c0a55; padding-inline: 6px; }
+.receipt-upload { display: grid; place-items: center; cursor: pointer; box-sizing: border-box; }
+.feature-panel .receipt-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; padding: 0; }
+.receipt-upload:has(+ .receipt-file-input:focus-visible) { outline: 2px solid #ffdf94; outline-offset: 3px; }
+#receipt-file-status { overflow-wrap: anywhere; }
+@keyframes section-arrive { from { transform: translateX(10px); opacity: .6; } to { transform: none; opacity: 1; } }

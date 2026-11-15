@@ -683,37 +683,103 @@ sectionTabs.forEach((tab, index) => {
 
 const flipSpin = $("flip-spin");
 const flipPointer = $("flip-pointer");
+const flipStake = $("flip-stake");
 let flipAngle = -90;
+let retryStakeCents = null;
+
+function spinRandomInt(limit) {
+  const buffer = new Uint8Array(1);
+  const cutoff = 256 - (256 % limit);
+  do { crypto.getRandomValues(buffer); } while (buffer[0] >= cutoff);
+  return buffer[0] % limit;
+}
+
+function flipPayouts() {
+  const cents = retryStakeCents ?? Math.round(Number(flipStake.value) * 100);
+  return {
+    dragon: ((cents * 2) / 100).toFixed(2),
+    fire: (Math.floor(cents / 5) / 100).toFixed(2),
+  };
+}
+
+flipStake.addEventListener("input", () => {
+  const payout = flipPayouts();
+  $("flip-payout").textContent = flipStake.validity.valid
+    ? `龙面返还 ${payout.dragon} USDC · 火面返还 ${payout.fire} USDC`
+    : "请输入 0.05 至 1,000,000 USDC，最多两位小数。";
+});
+
 flipSpin.addEventListener("click", async () => {
+  if (flipSpin.disabled) return;
+  if (retryStakeCents === null && !flipStake.reportValidity()) return;
+  const stakeCents = retryStakeCents ?? Math.round(Number(flipStake.value) * 100);
+  const payout = flipPayouts();
   flipSpin.disabled = true;
+  flipStake.disabled = true;
   unlockWinSound();
-  $("flip-result").textContent = "正在翻币…";
-  let draw;
-  do { draw = crypto.getRandomValues(new Uint8Array(1))[0]; } while (draw >= 250);
-  const roll = draw % 10;
-  const result = roll < 3
-    ? { angle: 270, text: "龙面 · 试玩返还 10 USDC", button: "再玩一次" }
-    : roll < 9
-      ? { angle: 70, text: "火面 · 试玩返还 1 USDC", button: "再玩一次" }
-      : { angle: 0, text: "平局 · 保留原试玩金额", button: "免费重转" };
-  const nextAngle = Math.ceil(flipAngle / 360) * 360 + 1440 + result.angle;
+  $("flip-result").textContent = "正在旋转…";
+
+  const roll = spinRandomInt(100);
+  const dragon = roll < 37;
+  const middle = roll >= 90;
+  // Keep landings clear of the divider, with an independent angle in each half.
+  const landingAngle = middle ? (spinRandomInt(2) ? 180 : 0)
+    : (dragon ? 192 : 12) + spinRandomInt(157);
+  const nextAngle = Math.ceil(flipAngle / 360) * 360 + 1440 + landingAngle;
   const animation = flipPointer.animate?.(
     [{ transform: `rotate(${flipAngle}deg)` }, { transform: `rotate(${nextAngle}deg)` }],
     { duration: 2000, easing: "cubic-bezier(.15,.55,.2,1)" },
   );
   await animation?.finished.catch(() => {});
-  flipAngle = result.angle;
+  flipAngle = landingAngle;
   flipPointer.style.transform = `rotate(${flipAngle}deg)`;
-  $("flip-result").textContent = result.text;
-  flipSpin.textContent = result.button;
+  retryStakeCents = middle ? stakeCents : null;
+  $("flip-result").textContent = middle
+    ? `平局 · 保留 ${(stakeCents / 100).toFixed(2)} USDC，免费重转`
+    : dragon
+      ? `龙面 · 试玩返还 ${payout.dragon} USDC`
+      : `火面 · 试玩返还 ${payout.fire} USDC`;
+  flipSpin.textContent = middle ? "免费重转" : "再次旋转";
+  flipStake.disabled = middle;
   flipSpin.disabled = false;
-  if (roll < 3) playWinSound("dragon");
+  if (dragon) playWinSound("dragon");
 });
 
 const receiptAmount = $("receipt-amount");
+const receiptFile = $("receipt-preview");
+const claimStatus = $("claim-status");
+const claimButton = $("claim-cashback");
+
+function resetClaimPreview() {
+  claimButton.disabled = false;
+  claimStatus.textContent = "试玩返现不会转入钱包。";
+}
+
+receiptFile.addEventListener("change", () => {
+  $("receipt-file-status").textContent = receiptFile.files[0]?.name || "仅本地预览，尚未选择文件";
+  resetClaimPreview();
+});
+
 receiptAmount.addEventListener("input", () => {
+  resetClaimPreview();
   const amount = receiptAmount.validity.valid ? Number(receiptAmount.value) : 0;
   const baseCents = Math.floor(Math.round(amount * 100) / 10);
   $("receipt-base").textContent = `$${(baseCents / 100).toFixed(2)}`;
   $("receipt-total").textContent = `$${(Math.min(baseCents, 250) / 100).toFixed(2)}`;
+});
+
+
+claimButton.addEventListener("click", () => {
+  if (!receiptFile.files.length) {
+    claimStatus.textContent = "请先选择一张收据。";
+    receiptFile.focus();
+    return;
+  }
+  if (!receiptAmount.reportValidity() || Number(receiptAmount.value) < 0.10) {
+    claimStatus.textContent = "请输入至少 0.10 美元的试玩收据金额。";
+    receiptAmount.focus();
+    return;
+  }
+  claimStatus.textContent = `试玩领取成功 · 返现 ${$("receipt-total").textContent} · 未发放资金`;
+  claimButton.disabled = true;
 });
