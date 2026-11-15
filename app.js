@@ -81,7 +81,7 @@ function render() {
     ["spin", "shuffle"].includes(phase) ||
     (phase === "choose" && (selected === null || !valid()));
   $("action").textContent =
-    phase === "done" ? "再试一次" : phase === "spin" ? "正在揭晓…" : "确认下注";
+    phase === "done" ? "再试一次" : phase === "spin" ? "正在揭晓…" : "揭牌";
   $("phase").textContent =
     mode === "duel"
       ? "在线对决筹备中，敬请期待"
@@ -641,7 +641,7 @@ reset();
     terms:
       '<h1>服务条款</h1><p class="notice">试玩版本说明 · 更新于 2026 年 11 月 13 日</p><h2>服务范围</h2><p>龙桌当前提供免费的浏览器游戏界面试玩。演示金额不是资产、余额或奖金，不可充值、提现、兑换或转让。</p><h2>使用条件</h2><p>本体验仅面向年满 18 周岁的用户。请遵守你所在地适用的规则。不得利用本站攻击系统、干扰其他用户或冒充运营方。</p><h2>结果与可用性</h2><p>试玩结果在浏览器内产生，可被本地修改，不构成可验证的真实资金游戏。服务可能调整或暂停。本站不承诺任何收益。</p><h2>正式服务</h2><p>真实资金功能尚未开放。运营主体、适用地区、支付、争议处理与正式服务条款仍需确定。</p>',
     rules:
-      '<h1>游戏规则</h1><p class="notice">试玩版本说明 · 更新于 2026 年 11 月 13 日</p><h2>单人试玩</h2><p>每轮五张牌中放置一张龙牌、一张猫师傅牌和三张空牌。输入演示金额，点击一张牌，再点击「确认下注」。三秒动画结束后，所选卡牌揭晓。</p><h2>结果</h2><p>选中龙牌时显示金色庆祝效果，猫牌显示猫师傅，空牌显示哭泣表情。龙牌与猫牌各有五分之一的概率。动画不影响结果。</p><h2>演示金额与奖金</h2><p>输入金额仅用于展示，不会扣款。成功时显示本轮演示金额，不代表赢得该金额。真实奖金倍率尚未确定。</p><h2>双人模式</h2><p>双人对决暂未开放。在线匹配、双方选牌、资金结算与争议规则将在上线前公布。</p>',
+      '<h1>游戏规则</h1><p class="notice">试玩版本说明 · 更新于 2026 年 11 月 13 日</p><h2>单人试玩</h2><p>每轮五张牌中放置一张龙牌、一张猫师傅牌和三张空牌。输入演示金额，点击一张牌，再点击「揭牌」。三秒动画结束后，所选卡牌揭晓。</p><h2>结果</h2><p>选中龙牌时显示金色庆祝效果，猫牌显示猫师傅，空牌显示哭泣表情。龙牌与猫牌各有五分之一的概率。动画不影响结果。</p><h2>演示金额与奖金</h2><p>输入金额仅用于展示，不会扣款。成功时显示本轮演示金额，不代表赢得该金额。真实奖金倍率尚未确定。</p><h2>双人模式</h2><p>双人对决暂未开放。在线匹配、双方选牌、资金结算与争议规则将在上线前公布。</p>',
     responsible:
       '<h1>理性游戏</h1><p class="notice">试玩版本说明 · 更新于 2026 年 11 月 13 日</p><h2>18 岁以上</h2><p>本网站仅面向成年人。当前体验免费，不涉及真实资金。</p><h2>保持适度</h2><p>为娱乐设置时间限制，定时休息。不要将随机游戏视作收入来源，不要追逐损失或借款参与。</p><h2>需要暂停时</h2><p>关闭页面即可结束当前试玩。如果游戏影响生活、工作或情绪，请与信任的人沟通，并寻求当地专业支持。</p><h2>功能状态</h2><p>当前没有真实账户，因此尚未提供账户级限额、自我排除或冷静期功能。真实资金服务开放前需要完善这些功能。</p>',
     support:
@@ -674,7 +674,6 @@ function selectSection(tab) {
     item.tabIndex = active ? 0 : -1;
     $(item.getAttribute("aria-controls")).hidden = !active;
   }
-  $("spin-history").hidden = tab.id !== "tab-flip";
   maybeStartTour(tab.id);
 }
 sectionTabs.forEach((tab, index) => {
@@ -786,7 +785,7 @@ const claimButton = $("claim-cashback");
 
 function resetClaimPreview() {
   claimButton.disabled = false;
-  claimStatus.textContent = "试玩返现不会转入钱包。";
+  claimStatus.textContent = "正式返现使用 Solana USDC。试玩返现不会转入钱包。";
 }
 
 receiptFile.addEventListener("change", () => {
@@ -858,12 +857,12 @@ $("spin-history").addEventListener("click", () => $("spin-history-dialog").showM
 const tours = {
   "tab-table": [
     ["#stake-picker", "选择金额", "点击筹码选择金额，也可以手动输入。"],
-    ["#cards", "翻开一张牌", "先选一张牌，再点击确认下注。"],
+    ["#cards", "翻开一张牌", "先选一张牌，再点击揭牌。"],
     ["#result", "查看本局结果", "翻牌结束后，这里会显示结果。"],
   ],
   "tab-flip": [
     ["#flip-stake-picker", "选择金额", "点击筹码或输入你想试玩的金额。"],
-    ["#spin-actions", "开始旋转", "点击旋转。指针停在中线时，使用原金额免费重转。"],
+    ["#flip-spin", "开始旋转", "点击旋转。指针停在中线时，使用原金额免费重转。"],
     ["#spin-history", "查看旋转记录", "这里可以回看本次访问中的试玩结果。"],
   ],
   "tab-cashback": [
@@ -875,6 +874,8 @@ const tours = {
 
 const tour = $("game-tour");
 const spotlight = $("tour-spotlight");
+const tourArrow = $("tour-arrow");
+const tourGap = 57;
 let activeTour;
 let tourIndex = 0;
 let tourTarget;
@@ -888,21 +889,37 @@ function hasSeenTour(id) {
 
 function positionTour() {
   if (!tour.open || !tourTarget) return;
+  const viewportHeight = window.innerHeight;
+  const viewportWidth = document.documentElement.clientWidth;
   const rect = tourTarget.getBoundingClientRect();
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const left = Math.max(0, rect.left - 5);
-  const top = Math.max(0, rect.top - 5);
+  const left = Math.max(0, rect.left);
+  const top = Math.max(0, rect.top);
+  const bottom = Math.min(viewportHeight, rect.bottom);
   Object.assign(spotlight.style, {
     left: left + "px",
     top: top + "px",
-    width: Math.max(0, Math.min(width, rect.right + 5) - left) + "px",
-    height: Math.max(0, Math.min(height, rect.bottom + 5) - top) + "px",
+    width: Math.max(0, Math.min(viewportWidth, rect.right) - left) + "px",
+    height: Math.max(0, bottom - top) + "px",
   });
-  const below = rect.bottom + 12;
-  const above = rect.top - tour.offsetHeight - 12;
-  const preferred = below + tour.offsetHeight < height ? below : above;
-  tour.style.top = Math.max(8, Math.min(height - tour.offsetHeight - 8, preferred)) + "px";
+  const arrowX = Math.max(34, Math.min(viewportWidth - 34, (rect.left + rect.right) / 2));
+  tourArrow.style.left = arrowX + "px";
+  tourArrow.style.top = (rect.bottom + 5) + "px";
+  tour.style.top = (rect.bottom + tourGap) + "px";
+  tour.style.maxHeight = Math.max(85, viewportHeight - rect.bottom - tourGap - 8) + "px";
+}
+
+function fitTourStep() {
+  if (!tour.open || !tourTarget) return;
+  const rect = tourTarget.getBoundingClientRect();
+  const height = window.innerHeight;
+  tour.style.maxHeight = "";
+  const panelHeight = tour.offsetHeight;
+  const desiredBottom = Math.max(height * .48, rect.height + 8);
+  const lastBottomWithRoom = height - Math.min(panelHeight, 105) - tourGap - 12;
+  const targetBottom = Math.min(desiredBottom, lastBottomWithRoom);
+  const scrollY = window.scrollY + rect.bottom - targetBottom;
+  window.scrollTo({ top: Math.max(0, scrollY), behavior: "instant" });
+  positionTour();
 }
 
 function showTourStep() {
@@ -913,12 +930,14 @@ function showTourStep() {
   $("tour-progress").textContent = Array.from({ length: 3 }, (_, i) => i === tourIndex ? "●" : "○").join(" ");
   $("tour-progress").setAttribute("aria-label", `第 ${tourIndex + 1} 步，共 3 步`);
   $("tour-next").textContent = tourIndex === 2 ? "完成" : "下一步";
-  tourTarget.scrollIntoView({ block: "center", behavior: "instant" });
   if (!tour.open) {
+    tour.style.top = "";
+    document.body.classList.add("tour-active");
     spotlight.hidden = false;
+    tourArrow.hidden = false;
     tour.showModal();
   }
-  positionTour();
+  fitTourStep();
 }
 
 function maybeStartTour(id, replay = false) {
@@ -935,12 +954,14 @@ $("tour-next").addEventListener("click", () => {
 $("tour-skip").addEventListener("click", () => tour.close());
 tour.addEventListener("close", () => {
   spotlight.hidden = true;
+  tourArrow.hidden = true;
+  document.body.classList.remove("tour-active");
   if (!activeTour) return;
   seenTours.add(activeTour);
   try { localStorage.setItem("dragon-tour-v1:" + activeTour, "seen"); } catch {}
   activeTour = null;
 });
-window.addEventListener("resize", positionTour);
+window.addEventListener("resize", fitTourStep);
 window.addEventListener("scroll", positionTour, { passive: true });
 function activeTabId() {
   return sectionTabs.find(tab => tab.getAttribute("aria-selected") === "true").id;
@@ -966,8 +987,10 @@ if (ageConfirmed) {
   enterSite();
 } else {
   $("age-no").addEventListener("click", () => {
-    $("age-warning").textContent = "访问已暂停。本网站仅供年满 18 周岁的用户使用。";
-    $("age-warning").classList.add("age-denied");
+    document.body.classList.replace("age-locked", "age-refused");
+    ageGate.close();
+    $("age-blocked").hidden = false;
+    $("blocked-title").focus();
   });
   $("age-yes").addEventListener("click", () => {
     try { localStorage.setItem("dragon-age-confirmed-v1", "yes"); } catch {}

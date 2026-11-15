@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#100402" />
     <title>龙桌 · 寻龙</title>
     <link rel="icon" type="image/png" href="dragon-avatar.png?v=original-1" />
-    <link rel="stylesheet" href="styles.css?v=tours-13" />
-    <script defer src="app.js?v=tours-13"></script>
+    <link rel="stylesheet" href="styles.css?v=tour-polish-14" />
+    <script defer src="app.js?v=tour-polish-14"></script>
     <link rel="preload" as="image" type="image/webp" href="card-cat.webp" />
     <link rel="preload" as="image" type="image/webp" href="card-dragon.webp" />
   </head>
@@ -17,10 +17,15 @@
       <h1 id="age-title">您是否已年满 18 周岁？</h1>
       <p id="age-warning" role="status">本网站仅供年满 18 周岁的用户使用。</p>
       <div class="age-actions action-row">
-        <button type="button" id="age-no" class="primary secondary">否</button>
-        <button type="button" id="age-yes" class="primary">是，进入网站</button>
+        <button type="button" id="age-yes" class="primary"><span aria-hidden="true">✓</span> 是，进入网站</button>
+        <button type="button" id="age-no" class="primary secondary"><span aria-hidden="true">✕</span> 否</button>
       </div>
     </dialog>
+    <main id="age-blocked" hidden aria-labelledby="blocked-title">
+      <img src="assets/spin-dragon.webp" alt="" />
+      <h1 id="blocked-title" tabindex="-1">暂无法访问龙桌</h1>
+      <p>你未满 18 周岁，无法使用本网站。</p>
+    </main>
     <noscript><p>请启用 JavaScript 以确认年龄。</p></noscript>
     <div class="scene">
       <div class="lantern left"></div>
@@ -29,7 +34,6 @@
         <a class="brand" href="./"
           ><img src="dragon-avatar.webp" alt="" /><span>龙桌</span></a
         ><button type="button" class="header-utility" id="tutorial-open">玩法说明</button
-        ><button type="button" class="header-utility" id="spin-history" aria-label="旋转记录" title="旋转记录" hidden>◷</button
         ><button id="wallet" class="wallet" aria-label="连接钱包">
           <svg
             viewBox="0 0 24 24"
@@ -48,7 +52,7 @@
       <main>
         <div class="section-tabs" role="tablist" aria-label="龙桌功能">
           <button id="tab-table" role="tab" aria-selected="true" aria-controls="panel-table">牌桌</button>
-          <button id="tab-flip" role="tab" aria-selected="false" aria-controls="panel-flip" tabindex="-1">龙转</button>
+          <button id="tab-flip" role="tab" aria-selected="false" aria-controls="panel-flip" tabindex="-1" translate="no">Dragon Spin</button>
           <button id="tab-cashback" role="tab" aria-selected="false" aria-controls="panel-cashback" tabindex="-1">返现</button>
         </div>
         <div id="panel-table" role="tabpanel" aria-labelledby="tab-table">
@@ -63,7 +67,7 @@
           ><button id="duel" aria-pressed="false">双人对决</button>
         </div>
         <div class="stake-picker" id="stake-picker" data-stake-picker="stake">
-          <label for="stake">试玩下注</label>
+          <label for="stake">试玩下注 · <span translate="no">Solana USDC</span></label>
           <div class="stake-capsule">
             <button type="button" data-limit="min">最低</button>
             <input id="stake" type="number" inputmode="decimal" min="0.01" max="1000000" step="0.01" value="5.00" required />
@@ -79,7 +83,7 @@
         </section>
         <div class="controls">
           <div class="action-row">
-            <button id="action" class="primary" disabled>确认下注</button
+            <button id="action" class="primary" disabled>揭牌</button
             ><button id="shuffle" class="primary secondary">洗牌</button>
           </div>
           <button id="invite" class="invite" hidden>创建邀请链接</button>
@@ -89,7 +93,8 @@
         </div>
         <section id="panel-flip" class="feature-panel" role="tabpanel" aria-labelledby="tab-flip" hidden>
           <p class="eyebrow">试玩预览 · 无真实下注</p>
-          <h1>龙转</h1>
+          <button type="button" class="header-utility" id="spin-history" aria-label="旋转记录" title="旋转记录">◷</button>
+          <h1 translate="no">Dragon Spin</h1>
           <div class="flip-stage" aria-hidden="true">
           <div class="flip-wheel">
             <div class="flip-half flip-dragon"><img src="assets/spin-dragon.webp" alt="" /><b>龙面 · 胜</b></div>
@@ -99,7 +104,7 @@
           <div id="spin-sparks"></div>
           </div>
           <div class="stake-picker" id="flip-stake-picker" data-stake-picker="flip-stake">
-          <label for="flip-stake">试玩下注</label>
+          <label for="flip-stake">试玩下注 · <span translate="no">Solana USDC</span></label>
           <div class="stake-capsule">
             <button type="button" data-limit="min">最低</button>
             <input id="flip-stake" type="number" inputmode="decimal" min="0.05" max="1000000" step="0.01" value="5.00" required aria-describedby="flip-payout" />
@@ -141,7 +146,7 @@
             <p class="feature-muted">金额手动输入。收据不会上传或自动读取。</p>
           </div>
           <button id="claim-cashback" class="primary" type="button">领取返现（试玩）</button>
-          <p id="claim-status" class="feature-muted" role="status">试玩返现不会转入钱包。</p></div>
+          <p id="claim-status" class="feature-muted" role="status">正式返现使用 Solana USDC。试玩返现不会转入钱包。</p></div>
         </section>
       </main>
     </div>
@@ -162,6 +167,12 @@
       </div>
     </dialog>
     <div id="tour-spotlight" aria-hidden="true" hidden></div>
+    <div id="tour-arrow" aria-hidden="true" hidden>
+      <svg viewBox="0 0 70 50" width="66" height="46" fill="none">
+        <path d="M8 46C23 44 34 32 34 23H24L44 4L63 23H52C49 38 29 47 8 46Z"
+          fill="#311b0c" stroke="#ffdea1" stroke-width="2.5" stroke-linejoin="round"/>
+      </svg>
+    </div>
     <dialog id="spin-history-dialog" aria-labelledby="history-title">
       <button class="close" type="button" aria-label="关闭">×</button>
       <h2 id="history-title">旋转记录</h2>
@@ -219,6 +230,7 @@
       <div class="account-heading">
         <span class="account-kicker">龙桌</span>
         <p id="address">选择钱包</p>
+        <p class="feature-muted">网络：<span translate="no">Solana</span></p>
       </div>
       <div class="wallet-options" role="group" aria-label="选择钱包">
         <button

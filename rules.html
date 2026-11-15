@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>游戏规则 · 龙桌</title>
-    <link rel="stylesheet" href="styles.css?v=tours-13" />
-  <script defer src="app.js?v=tours-13"></script>
+    <link rel="stylesheet" href="styles.css?v=tour-polish-14" />
+  <script defer src="app.js?v=tour-polish-14"></script>
   </head>
   <body class="age-locked">
     <dialog id="age-gate" aria-labelledby="age-title" aria-describedby="age-warning">
@@ -13,10 +13,15 @@
       <h1 id="age-title">您是否已年满 18 周岁？</h1>
       <p id="age-warning" role="status">本网站仅供年满 18 周岁的用户使用。</p>
       <div class="age-actions action-row">
-        <button type="button" id="age-no" class="primary secondary">否</button>
-        <button type="button" id="age-yes" class="primary">是，进入网站</button>
+        <button type="button" id="age-yes" class="primary"><span aria-hidden="true">✓</span> 是，进入网站</button>
+        <button type="button" id="age-no" class="primary secondary"><span aria-hidden="true">✕</span> 否</button>
       </div>
     </dialog>
+    <main id="age-blocked" hidden aria-labelledby="blocked-title">
+      <img src="assets/spin-dragon.webp" alt="" />
+      <h1 id="blocked-title" tabindex="-1">暂无法访问龙桌</h1>
+      <p>你未满 18 周岁，无法使用本网站。</p>
+    </main>
     <noscript><p>请启用 JavaScript 以确认年龄。</p></noscript>
     <header class="document-header">
       <a class="brand" href="./"
@@ -28,7 +33,7 @@
       <p class="notice">试玩版本说明 · 更新于 2026 年 11 月 13 日</p>
       <h2>单人试玩</h2>
       <p>
-        每轮五张牌中放置一张龙牌、一张猫师傅牌和三张空牌。输入演示金额，点击一张牌，再点击「确认下注」。三秒动画结束后，所选卡牌揭晓。
+        每轮五张牌中放置一张龙牌、一张猫师傅牌和三张空牌。输入演示金额，点击一张牌，再点击「揭牌」。三秒动画结束后，所选卡牌揭晓。
       </p>
       <h2>结果</h2>
       <p>

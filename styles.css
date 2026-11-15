@@ -1420,6 +1420,7 @@ input[hidden] {
 .scene > header::before { top: 7px; left: 7px; }
 .scene > header::after { top: 7px; right: 7px; transform: scaleX(-1); }
 .scene #wallet,
+#age-gate .primary,
 .section-tabs,
 .feature-panel .primary {
   border: 1px solid var(--frame-gold);
@@ -1491,6 +1492,7 @@ input[hidden] {
   box-shadow: none;
 }
 .scene #wallet::before,
+#age-gate .primary::before,
 .section-tabs::before,
 .feature-panel .primary::before,
 .spin-result::before,
@@ -1547,7 +1549,23 @@ input[hidden] {
 
 /* Entry confirmation and guided controls. */
 [hidden] { display: none !important; }
-body.age-locked > :not(#age-gate):not(noscript):not(script) { display: none !important; }
+body.age-locked:not(:has(#age-gate[open])) > :not(#age-gate, noscript, script),
+body.age-refused > :not(#age-blocked) { display: none !important; }
+body.age-locked, body.age-refused { overflow: hidden; }
+#age-gate::backdrop { background: #000a; backdrop-filter: none; }
+#age-blocked {
+  min-height: 100dvh;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 24px;
+  box-sizing: border-box;
+  text-align: center;
+  color: #ffe2a4;
+}
+#age-blocked img { width: min(72vw, 440px, 55dvh); height: auto; }
+#age-blocked h1 { margin: 12px 0 0; font-size: clamp(25px, 7vw, 42px); }
+#age-blocked p { margin: 10px 0; }
 #age-gate, #game-tour, #spin-history-dialog {
   box-sizing: border-box;
   color: #ffe2a4;
@@ -1558,23 +1576,48 @@ body.age-locked > :not(#age-gate):not(noscript):not(script) { display: none !imp
 }
 #age-gate {
   text-align: center;
-  background: linear-gradient(110deg,#1a0906,#1f0b06d9),
+  background: linear-gradient(110deg,#1a0906 32%,#1f0b068c),
     url(assets/spin-dragon.webp) right center / min(210px,55%) auto no-repeat #210d06;
 }
 .age-mark { color: #ffe19a; font-size: 24px; font-weight: bold; }
 #age-title { font-size: clamp(19px, 5vw, 24px); }
 #age-warning { line-height: 1.5; }
-.age-denied { color: #ffb398; }
+#age-gate .age-actions { gap: 16px; }
+#age-gate .primary { min-height: 48px; font-size: clamp(13px, 3.8vw, 16px); }
+#age-gate #age-yes { --ornate-fill: linear-gradient(#781d0e, #4d0b06 55%, #290603); }
+#age-gate .primary span { display: inline-block; margin-right: .3em; font-weight: 900; font-size: 1.15em; }
 #age-gate .action-row, #game-tour .action-row, .spin-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
 #age-gate .primary, #game-tour .primary { padding-inline: 5px; }
 #game-tour { position: fixed; margin: 0 auto; inset: 8px 0 auto; max-height: calc(100dvh - 16px); padding: 14px; }
 #game-tour::backdrop { background: transparent; backdrop-filter: none; }
 #game-tour h2, #game-tour p { margin: 0 0 10px; }
 #tour-progress { color: #e6b255; letter-spacing: .2em; }
-#tour-spotlight { position: fixed; z-index: 2147483647; border-radius: 8px; box-sizing: border-box; border: 2px solid #f9d482; box-shadow: 0 0 0 150vmax #000c,0 0 16px #eab754; pointer-events: none; }
+.tour-active { padding-bottom: 55dvh; }
+#tour-spotlight {
+  position: fixed;
+  z-index: 2147483646;
+  box-shadow: 0 0 0 150vmax #000c;
+  pointer-events: none;
+}
+#tour-arrow {
+  position: fixed;
+  z-index: 2147483647;
+  transform: translateX(-41px);
+  pointer-events: none;
+}
+#game-tour { overflow: auto; }
+
 #spin-history-list { padding-left: 22px; line-height: 1.65; }
 .header-utility { color: #ffe2a4; background: #190a05; border: 1px solid #87592c; border-radius: 4px; padding: 5px 9px; white-space: nowrap; min-height: 32px; }
-#spin-history { font-size: 19px; line-height: 1; }
+#spin-history {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  font-size: 19px;
+  line-height: 1;
+}
+#panel-flip > .eyebrow { padding-inline: 35px; }
 
 .stake-picker { width: min(100%, 330px); margin: 14px auto; color: #ffe2a4; }
 #stake-picker { width: min(calc(100% - 32px), 330px); }
@@ -1610,11 +1653,30 @@ body.age-locked > :not(#age-gate):not(noscript):not(script) { display: none !imp
 .spin-actions { align-items: stretch; margin-top: 10px; }
 .spin-actions .spin-result { display: grid; place-items: center; margin: 0; font-size: clamp(11px,3vw,14px); }
 .spin-actions #flip-spin { font-size: clamp(13px,4vw,17px); padding-inline: 8px; }
-.flip-half { box-sizing: border-box; padding: 8px 0; gap: 2px; }
-.flip-dragon img,.flip-fire img { display: block; width: 53%; height: 69%; max-width: 138px; object-fit: contain; mix-blend-mode: normal; }
-.flip-half b { position: relative; z-index: 3; transform: none; padding: 1px 7px; line-height: 1.2; font-size: clamp(11px,3vw,14px); }
-.flip-dragon { padding-bottom: 10px; }
-.flip-fire { padding-top: 10px; }
+.flip-half { box-sizing: border-box; padding: 0; }
+.flip-dragon img, .flip-fire img {
+  display: block;
+  width: 52%;
+  height: 66%;
+  max-width: 138px;
+  object-fit: contain;
+  mix-blend-mode: normal;
+}
+.flip-dragon img { margin-top: 12%; }
+.flip-fire img { margin-bottom: 12%; }
+.flip-half b {
+  position: absolute;
+  left: 50%;
+  z-index: 3;
+  transform: translate(-50%, -50%);
+  padding: 1px 7px;
+  line-height: 1.2;
+  font-size: clamp(11px, 3vw, 14px);
+  white-space: nowrap;
+}
+.flip-dragon b { top: 16%; }
+.flip-fire b { top: 84%; }
+#flip-pointer { width: 23%; }
 .eligibility-box { --ornate-fill: linear-gradient(90deg,#270f09 27%,#270f09c7),url(assets/spin-dragon.webp) right 8px center/145px auto no-repeat #270f09; }
 @media (max-width: 1024px) {
   .scene > header::before, .scene > header::after { display: none; }
@@ -1623,6 +1685,5 @@ body.age-locked > :not(#age-gate):not(noscript):not(script) { display: none !imp
   .scene > header { gap: 5px; padding-inline: 9px; }
   .scene > header .brand { font-size: 17px; }
   .scene > header .header-utility { padding-inline: 5px; font-size: 11px; }
-  .scene > header #spin-history { font-size: 18px; }
   .scene #wallet { padding-inline: 5px; }
 }
