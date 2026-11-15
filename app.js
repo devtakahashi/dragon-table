@@ -876,6 +876,8 @@ const tour = $("game-tour");
 const spotlight = $("tour-spotlight");
 const tourArrow = $("tour-arrow");
 const tourGap = 57;
+const spotlightPadding = 6;
+const tourTargetObserver = new ResizeObserver(fitTourStep);
 let activeTour;
 let tourIndex = 0;
 let tourTarget;
@@ -892,13 +894,14 @@ function positionTour() {
   const viewportHeight = window.innerHeight;
   const viewportWidth = document.documentElement.clientWidth;
   const rect = tourTarget.getBoundingClientRect();
-  const left = Math.max(0, rect.left);
-  const top = Math.max(0, rect.top);
-  const bottom = Math.min(viewportHeight, rect.bottom);
+  const left = Math.max(0, Math.floor(rect.left) - spotlightPadding);
+  const right = Math.min(viewportWidth, Math.ceil(rect.right) + spotlightPadding);
+  const top = Math.max(0, Math.floor(rect.top) - spotlightPadding);
+  const bottom = Math.min(viewportHeight, Math.ceil(rect.bottom) + spotlightPadding);
   Object.assign(spotlight.style, {
     left: left + "px",
     top: top + "px",
-    width: Math.max(0, Math.min(viewportWidth, rect.right) - left) + "px",
+    width: Math.max(0, right - left) + "px",
     height: Math.max(0, bottom - top) + "px",
   });
   const arrowX = Math.max(34, Math.min(viewportWidth - 34, (rect.left + rect.right) / 2));
@@ -914,9 +917,10 @@ function fitTourStep() {
   const height = window.innerHeight;
   tour.style.maxHeight = "";
   const panelHeight = tour.offsetHeight;
-  const desiredBottom = Math.max(height * .48, rect.height + 8);
-  const lastBottomWithRoom = height - Math.min(panelHeight, 105) - tourGap - 12;
-  const targetBottom = Math.min(desiredBottom, lastBottomWithRoom);
+  const minTargetBottom = rect.height + spotlightPadding + 4;
+  const lastBottomWithFullDialog = height - panelHeight - tourGap - 8;
+  const lastBottomWithCompactDialog = height - Math.min(panelHeight, 105) - tourGap - 8;
+  const targetBottom = Math.min(lastBottomWithCompactDialog, Math.max(minTargetBottom, Math.min(height * .48, lastBottomWithFullDialog)));
   const scrollY = window.scrollY + rect.bottom - targetBottom;
   window.scrollTo({ top: Math.max(0, scrollY), behavior: "instant" });
   positionTour();
@@ -924,7 +928,12 @@ function fitTourStep() {
 
 function showTourStep() {
   const [selector, title, copy] = tours[activeTour][tourIndex];
+  tourTargetObserver.disconnect();
   tourTarget = document.querySelector(selector);
+  const panelEntry = tourTarget.closest(".feature-panel")?.getAnimations()
+    .find(animation => animation.animationName === "section-arrive");
+  panelEntry?.finish();
+  tourTargetObserver.observe(tourTarget);
   $("tour-title").textContent = title;
   $("tour-copy").textContent = copy;
   $("tour-progress").textContent = Array.from({ length: 3 }, (_, i) => i === tourIndex ? "●" : "○").join(" ");
@@ -953,6 +962,7 @@ $("tour-next").addEventListener("click", () => {
 });
 $("tour-skip").addEventListener("click", () => tour.close());
 tour.addEventListener("close", () => {
+  tourTargetObserver.disconnect();
   spotlight.hidden = true;
   tourArrow.hidden = true;
   document.body.classList.remove("tour-active");
