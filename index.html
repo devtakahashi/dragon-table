@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#100402" />
     <title>龙桌 · 寻龙</title>
     <link rel="icon" type="image/png" href="dragon-avatar.png?v=original-1" />
-    <link rel="stylesheet" href="styles.css?v=invite-7" />
-    <script defer src="app.js?v=win-sound-8"></script>
+    <link rel="stylesheet" href="styles.css?v=sections-9" />
+    <script defer src="app.js?v=sections-9"></script>
     <link rel="preload" as="image" type="image/webp" href="card-cat.webp" />
     <link rel="preload" as="image" type="image/webp" href="card-dragon.webp" />
   </head>
@@ -35,6 +35,12 @@
         </button>
       </header>
       <main>
+        <div class="section-tabs" role="tablist" aria-label="龙桌功能">
+          <button id="tab-table" role="tab" aria-selected="true" aria-controls="panel-table">牌桌</button>
+          <button id="tab-flip" role="tab" aria-selected="false" aria-controls="panel-flip" tabindex="-1">翻币</button>
+          <button id="tab-cashback" role="tab" aria-selected="false" aria-controls="panel-cashback" tabindex="-1">返现</button>
+        </div>
+        <div id="panel-table" role="tabpanel" aria-labelledby="tab-table">
         <div class="intro">
           <p class="eyebrow">龙隐五牌 · 一翻见分晓</p>
           <h1>寻龙</h1>
@@ -74,6 +80,45 @@
           <p class="demo">试玩模式 · 不扣款 · 不产生真实奖金</p>
           <button id="win-sound" class="invite" type="button" aria-pressed="true">胜利音效：开</button>
         </div>
+        </div>
+        <section id="panel-flip" class="feature-panel" role="tabpanel" aria-labelledby="tab-flip" hidden>
+          <p class="eyebrow">试玩预览 · 无真实下注</p>
+          <h1>龙焰翻币</h1>
+          <div class="flip-wheel" aria-hidden="true">
+            <div class="flip-half flip-dragon"><img src="dragon-avatar.webp" alt="" /><b>龙面 · 胜</b></div>
+            <div class="flip-half flip-fire"><span>🔥</span><b>火面 · 负</b></div>
+            <div class="flip-divider"></div><div id="flip-pointer"></div>
+          </div>
+          <p>试玩金额 5 USDC</p>
+          <p class="feature-muted">龙面返还 10 USDC · 火面返还 1 USDC<br />平局保留原金额，可免费重转</p>
+          <p id="flip-result" role="status">点击开始试玩</p>
+          <button id="flip-spin" type="button" class="primary">开始翻币</button>
+        </section>
+        <section id="panel-cashback" class="feature-panel" role="tabpanel" aria-labelledby="tab-cashback" hidden>
+          <p class="eyebrow">返现功能预览 · 示例数据</p>
+          <h1>持币返现</h1>
+          <dl class="feature-box eligibility-box">
+            <div><dt>示例钱包余额</dt><dd>3,200 DRAGON ≈ $32.00</dd></div>
+            <div><dt>连续持有</dt><dd>26 小时</dd></div>
+            <div><dt>资格</dt><dd>符合资格</dd></div>
+            <div><dt>返现上限</dt><dd>$2.50</dd></div>
+          </dl>
+          <p class="feature-muted">连续持有满 24 小时且未卖出 · 每 48 小时限领一次</p>
+          <p>Uber · McDonald’s · Grab · KFC</p>
+          <label class="receipt-label" for="receipt-preview">选择收据（仅本地预览）</label>
+          <input id="receipt-preview" type="file" accept="image/*,application/pdf" />
+          <label class="receipt-label" for="receipt-amount">试玩收据金额（美元）</label>
+          <input id="receipt-amount" type="number" inputmode="decimal" min="0" step="0.01" max="1000000" value="50.00" />
+          <div class="feature-box">
+            <h2>Harmonic 计算预览</h2>
+            <dl>
+              <div><dt>10% 基础返现</dt><dd id="receipt-base">$5.00</dd></div>
+              <div><dt>示例档位上限</dt><dd>$2.50</dd></div>
+              <div><dt>预计返现</dt><dd><output id="receipt-total" for="receipt-amount">$2.50</output></dd></div>
+            </dl>
+            <p class="feature-muted">金额手动输入。收据不会上传或自动读取，试玩不发放返现。</p>
+          </div>
+        </section>
       </main>
     </div>
     <footer>

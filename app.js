@@ -660,3 +660,60 @@ reset();
   );
   openPage();
 })();
+
+const sectionTabs = [...document.querySelectorAll(".section-tabs [role=tab]")];
+function selectSection(tab) {
+  for (const item of sectionTabs) {
+    const active = item === tab;
+    item.setAttribute("aria-selected", String(active));
+    item.tabIndex = active ? 0 : -1;
+    $(item.getAttribute("aria-controls")).hidden = !active;
+  }
+}
+sectionTabs.forEach((tab, index) => {
+  tab.addEventListener("click", () => selectSection(tab));
+  tab.addEventListener("keydown", (event) => {
+    const nextIndex = { ArrowLeft: (index + 2) % 3, ArrowRight: (index + 1) % 3, Home: 0, End: 2 }[event.key];
+    if (nextIndex === undefined) return;
+    event.preventDefault();
+    selectSection(sectionTabs[nextIndex]);
+    sectionTabs[nextIndex].focus();
+  });
+});
+
+const flipSpin = $("flip-spin");
+const flipPointer = $("flip-pointer");
+let flipAngle = -90;
+flipSpin.addEventListener("click", async () => {
+  flipSpin.disabled = true;
+  unlockWinSound();
+  $("flip-result").textContent = "正在翻币…";
+  let draw;
+  do { draw = crypto.getRandomValues(new Uint8Array(1))[0]; } while (draw >= 250);
+  const roll = draw % 10;
+  const result = roll < 3
+    ? { angle: 270, text: "龙面 · 试玩返还 10 USDC", button: "再玩一次" }
+    : roll < 9
+      ? { angle: 70, text: "火面 · 试玩返还 1 USDC", button: "再玩一次" }
+      : { angle: 0, text: "平局 · 保留原试玩金额", button: "免费重转" };
+  const nextAngle = Math.ceil(flipAngle / 360) * 360 + 1440 + result.angle;
+  const animation = flipPointer.animate?.(
+    [{ transform: `rotate(${flipAngle}deg)` }, { transform: `rotate(${nextAngle}deg)` }],
+    { duration: 2000, easing: "cubic-bezier(.15,.55,.2,1)" },
+  );
+  await animation?.finished.catch(() => {});
+  flipAngle = result.angle;
+  flipPointer.style.transform = `rotate(${flipAngle}deg)`;
+  $("flip-result").textContent = result.text;
+  flipSpin.textContent = result.button;
+  flipSpin.disabled = false;
+  if (roll < 3) playWinSound("dragon");
+});
+
+const receiptAmount = $("receipt-amount");
+receiptAmount.addEventListener("input", () => {
+  const amount = receiptAmount.validity.valid ? Number(receiptAmount.value) : 0;
+  const baseCents = Math.floor(Math.round(amount * 100) / 10);
+  $("receipt-base").textContent = `$${(baseCents / 100).toFixed(2)}`;
+  $("receipt-total").textContent = `$${(Math.min(baseCents, 250) / 100).toFixed(2)}`;
+});
