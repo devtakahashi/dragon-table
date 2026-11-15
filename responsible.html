@@ -4,9 +4,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>理性游戏 · 龙桌</title>
-    <link rel="stylesheet" href="styles.css?v=auto-webp-6" />
+    <link rel="stylesheet" href="styles.css?v=tours-13" />
+  <script defer src="app.js?v=tours-13"></script>
   </head>
-  <body>
+  <body class="age-locked">
+    <dialog id="age-gate" aria-labelledby="age-title" aria-describedby="age-warning">
+      <p class="age-mark">18+</p>
+      <h1 id="age-title">您是否已年满 18 周岁？</h1>
+      <p id="age-warning" role="status">本网站仅供年满 18 周岁的用户使用。</p>
+      <div class="age-actions action-row">
+        <button type="button" id="age-no" class="primary secondary">否</button>
+        <button type="button" id="age-yes" class="primary">是，进入网站</button>
+      </div>
+    </dialog>
+    <noscript><p>请启用 JavaScript 以确认年龄。</p></noscript>
     <header class="document-header">
       <a class="brand" href="./"
         ><img src="dragon-avatar.webp" alt="" /><span>龙桌</span></a

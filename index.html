@@ -6,19 +6,30 @@
     <meta name="theme-color" content="#100402" />
     <title>龙桌 · 寻龙</title>
     <link rel="icon" type="image/png" href="dragon-avatar.png?v=original-1" />
-    <link rel="stylesheet" href="styles.css?v=spin-gold-12" />
-    <script defer src="app.js?v=spin-gold-12"></script>
+    <link rel="stylesheet" href="styles.css?v=tours-13" />
+    <script defer src="app.js?v=tours-13"></script>
     <link rel="preload" as="image" type="image/webp" href="card-cat.webp" />
     <link rel="preload" as="image" type="image/webp" href="card-dragon.webp" />
   </head>
-  <body>
+  <body class="age-locked">
+    <dialog id="age-gate" aria-labelledby="age-title" aria-describedby="age-warning">
+      <p class="age-mark">18+</p>
+      <h1 id="age-title">您是否已年满 18 周岁？</h1>
+      <p id="age-warning" role="status">本网站仅供年满 18 周岁的用户使用。</p>
+      <div class="age-actions action-row">
+        <button type="button" id="age-no" class="primary secondary">否</button>
+        <button type="button" id="age-yes" class="primary">是，进入网站</button>
+      </div>
+    </dialog>
+    <noscript><p>请启用 JavaScript 以确认年龄。</p></noscript>
     <div class="scene">
       <div class="lantern left"></div>
       <div class="lantern right"></div>
       <header>
         <a class="brand" href="./"
           ><img src="dragon-avatar.webp" alt="" /><span>龙桌</span></a
-        ><a class="rules-link" href="#page=rules">玩法说明</a
+        ><button type="button" class="header-utility" id="tutorial-open">玩法说明</button
+        ><button type="button" class="header-utility" id="spin-history" aria-label="旋转记录" title="旋转记录" hidden>◷</button
         ><button id="wallet" class="wallet" aria-label="连接钱包">
           <svg
             viewBox="0 0 24 24"
@@ -51,19 +62,15 @@
           <button id="solo" aria-pressed="true">单人试玩</button
           ><button id="duel" aria-pressed="false">双人对决</button>
         </div>
-        <div class="stake-row">
-          <label for="stake">演示下注</label>
-          <div class="amount">
-            <input
-              id="stake"
-              type="number"
-              min="0.01"
-              max="1000000"
-              step="0.01"
-              value="5"
-              inputmode="decimal"
-            /><span>USDC</span>
+        <div class="stake-picker" id="stake-picker" data-stake-picker="stake">
+          <label for="stake">试玩下注</label>
+          <div class="stake-capsule">
+            <button type="button" data-limit="min">最低</button>
+            <input id="stake" type="number" inputmode="decimal" min="0.01" max="1000000" step="0.01" value="5.00" required />
+            <span>USDC</span>
+            <button type="button" data-limit="max">最高</button>
           </div>
+          <div class="stake-chips" role="group" aria-label="预设金额"><button type="button" data-stake="1" aria-pressed="false">1</button><button type="button" data-stake="5" aria-pressed="true">5</button><button type="button" data-stake="10" aria-pressed="false">10</button><button type="button" data-stake="25" aria-pressed="false">25</button><button type="button" data-stake="50" aria-pressed="false">50</button><button type="button" data-stake="100" aria-pressed="false">100</button></div>
         </div>
         <p id="phase" role="status" aria-live="polite">请选择一张牌</p>
         <section class="table" aria-label="五张游戏牌">
@@ -78,7 +85,6 @@
           <button id="invite" class="invite" hidden>创建邀请链接</button>
           <p id="result" aria-live="polite">选牌后确认，揭晓你的运气。</p>
           <p class="demo">试玩模式 · 不扣款 · 不产生真实奖金</p>
-          <button id="win-sound" class="invite" type="button" aria-pressed="true">胜利音效：开</button>
         </div>
         </div>
         <section id="panel-flip" class="feature-panel" role="tabpanel" aria-labelledby="tab-flip" hidden>
@@ -86,18 +92,28 @@
           <h1>龙转</h1>
           <div class="flip-stage" aria-hidden="true">
           <div class="flip-wheel">
-            <div class="flip-half flip-dragon"><img src="dragon-avatar.webp" alt="" /><b>龙面 · 胜</b></div>
-            <div class="flip-half flip-fire"><span class="spin-flame"></span><b>火面 · 负</b></div>
+            <div class="flip-half flip-dragon"><img src="assets/spin-dragon.webp" alt="" /><b>龙面 · 胜</b></div>
+            <div class="flip-half flip-fire"><img src="assets/spin-fire.webp" alt="" /><b>火面 · 负</b></div>
             <div class="flip-divider"></div><div id="flip-pointer"></div>
           </div>
           <div id="spin-sparks"></div>
           </div>
-          <label class="receipt-label" for="flip-stake">试玩下注金额（USDC）</label>
-          <input id="flip-stake" type="number" inputmode="decimal" min="0.05" max="1000000" step="0.01" value="5.00" required aria-describedby="flip-payout" />
+          <div class="stake-picker" id="flip-stake-picker" data-stake-picker="flip-stake">
+          <label for="flip-stake">试玩下注</label>
+          <div class="stake-capsule">
+            <button type="button" data-limit="min">最低</button>
+            <input id="flip-stake" type="number" inputmode="decimal" min="0.05" max="1000000" step="0.01" value="5.00" required aria-describedby="flip-payout" />
+            <span>USDC</span>
+            <button type="button" data-limit="max">最高</button>
+          </div>
+          <div class="stake-chips" role="group" aria-label="预设金额"><button type="button" data-stake="1" aria-pressed="false">1</button><button type="button" data-stake="5" aria-pressed="true">5</button><button type="button" data-stake="10" aria-pressed="false">10</button><button type="button" data-stake="25" aria-pressed="false">25</button><button type="button" data-stake="50" aria-pressed="false">50</button><button type="button" data-stake="100" aria-pressed="false">100</button></div>
+        </div>
           <p id="flip-payout" class="feature-muted">龙面返还 10.00 USDC · 火面返还 1.00 USDC</p>
           <p class="feature-muted">平局保留原金额，可免费重转</p>
-          <p id="flip-result" class="spin-result" role="status">点击旋转开始试玩</p>
-          <button id="flip-spin" type="button" class="primary">旋转</button>
+          <div class="spin-actions" id="spin-actions">
+            <p id="flip-result" class="spin-result" role="status">等待旋转</p>
+            <button id="flip-spin" type="button" class="primary">旋转</button>
+          </div>
         </section>
         <section id="panel-cashback" class="feature-panel" role="tabpanel" aria-labelledby="tab-cashback" hidden>
           <p class="eyebrow">返现功能预览 · 示例数据</p>
@@ -109,13 +125,13 @@
             <div><dt>返现上限</dt><dd>$2.50</dd></div>
           </dl>
           <p class="feature-muted">连续持有满 24 小时且未卖出 · 每 48 小时限领一次</p>
-          <p>Uber · McDonald’s · Grab · KFC</p>
+          <p>Uber · Grab · GO Taxi · McDonald’s · KFC</p>
           <label class="receipt-upload primary" for="receipt-preview">↑ 上传收据</label>
           <input id="receipt-preview" class="receipt-file-input" type="file" accept="image/*,application/pdf" aria-describedby="receipt-file-status" />
           <p id="receipt-file-status" class="feature-muted">仅本地预览，尚未选择文件</p>
-          <label class="receipt-label" for="receipt-amount">试玩收据金额（美元）</label>
-          <input id="receipt-amount" type="number" inputmode="decimal" min="0" step="0.01" max="1000000" value="50.00" />
-          <div class="feature-box">
+          <div class="receipt-amount-field"><label class="receipt-label" for="receipt-amount">试玩收据金额（美元）</label>
+          <input id="receipt-amount" type="number" inputmode="decimal" min="0" step="0.01" max="1000000" value="50.00" /></div>
+          <div id="claim-tour-target"><div class="feature-box">
             <h2>Harmonic 计算预览</h2>
             <dl>
               <div><dt>10% 基础返现</dt><dd id="receipt-base">$5.00</dd></div>
@@ -125,7 +141,7 @@
             <p class="feature-muted">金额手动输入。收据不会上传或自动读取。</p>
           </div>
           <button id="claim-cashback" class="primary" type="button">领取返现（试玩）</button>
-          <p id="claim-status" class="feature-muted" role="status">试玩返现不会转入钱包。</p>
+          <p id="claim-status" class="feature-muted" role="status">试玩返现不会转入钱包。</p></div>
         </section>
       </main>
     </div>
@@ -137,6 +153,21 @@
       <p>© 龙桌 · 寻龙</p>
       <a href="https://x.com/PlayDragonTable" target="_blank" rel="noopener noreferrer" aria-label="龙桌官方 X 账号 @PlayDragonTable">X · @PlayDragonTable</a>
     </footer>
+    <dialog id="game-tour" aria-labelledby="tour-title" aria-describedby="tour-copy">
+      <p id="tour-progress" aria-label="第 1 步，共 3 步"></p>
+      <h2 id="tour-title"></h2><p id="tour-copy"></p>
+      <div class="action-row">
+        <button type="button" class="primary secondary" id="tour-skip">跳过</button>
+        <button type="button" class="primary" id="tour-next">下一步</button>
+      </div>
+    </dialog>
+    <div id="tour-spotlight" aria-hidden="true" hidden></div>
+    <dialog id="spin-history-dialog" aria-labelledby="history-title">
+      <button class="close" type="button" aria-label="关闭">×</button>
+      <h2 id="history-title">旋转记录</h2>
+      <p id="spin-history-empty">还没有试玩记录。</p>
+      <ol id="spin-history-list"></ol>
+    </dialog>
     <dialog id="wallet-dialog" aria-label="钱包与游戏动态">
       <svg
         class="account-corner top-left"

@@ -1,5 +1,7 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
+function initializeGame() {
+  if (!$("cards")) return;
 window.demoStats = { dragon: 0, cat: 0, loss: 0 };
 let cat = 1;
 // Explicit Shuffle and Reveal actions always animate; no separate toggle.
@@ -115,24 +117,10 @@ function reset() {
   $("result").textContent = "选牌后确认，揭晓你的运气。";
   render();
 }
-const winSoundButton = $("win-sound");
-let winSoundEnabled = true;
-try {
-  winSoundEnabled = localStorage.getItem("dragon-table-win-sound") !== "off";
-} catch {
-  // The toggle can still work for this page when storage is unavailable.
-}
 let winAudio;
 let winVolume;
 
-function updateWinSoundButton() {
-  winSoundButton.textContent = winSoundEnabled ? "胜利音效：开" : "胜利音效：关";
-  winSoundButton.setAttribute("aria-pressed", String(winSoundEnabled));
-  if (winVolume) winVolume.gain.value = winSoundEnabled ? 0.30 : 0;
-}
-
 function unlockWinSound() {
-  if (!winSoundEnabled) return;
   const Audio = window.AudioContext || window.webkitAudioContext;
   if (!Audio) return;
   try {
@@ -143,14 +131,14 @@ function unlockWinSound() {
       winVolume.connect(winAudio.destination);
     }
     // Resume inside the tap, before the asynchronous card reveal.
-    if (winAudio.state !== "running") winAudio.resume().catch(() => {});
+    if (winAudio.state !== "running") return winAudio.resume().catch(() => {});
   } catch {
     // Audio is optional; a browser audio error must not interrupt the round.
   }
 }
 
 function playWinSound(kind) {
-  if (!winSoundEnabled || winAudio?.state !== "running" || !winVolume) return;
+  if (winAudio?.state !== "running" || !winVolume) return;
   const melody = kind === "cat" ? [67, 69, 72, 76] : [60, 64, 67, 69, 72, 76];
   const start = winAudio.currentTime + 0.02;
   melody.forEach((note, index) => {
@@ -177,17 +165,33 @@ function playWinSound(kind) {
   });
 }
 
-winSoundButton.addEventListener("click", () => {
-  winSoundEnabled = !winSoundEnabled;
-  try {
-    localStorage.setItem("dragon-table-win-sound", winSoundEnabled ? "on" : "off");
-  } catch {
-    // The current page still respects the toggle.
-  }
-  updateWinSoundButton();
-  unlockWinSound();
-});
-updateWinSoundButton();
+function playMechanicSound(kind) {
+  Promise.resolve(unlockWinSound()).then(() => {
+    if (winAudio?.state !== "running" || !winVolume) return;
+    const now = winAudio.currentTime;
+    const beats = kind === "shuffle"
+      ? [0, .08, .18, .34, .75, .83, .93, 1.09]
+      : Array.from({ length: 21 }, (_, i) => 0.033 * i + 0.003 * i * i);
+    const noise = winAudio.createBuffer(1, Math.floor(winAudio.sampleRate * .08), winAudio.sampleRate);
+    const samples = noise.getChannelData(0);
+    for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+    for (const beat of beats) {
+      const time = now + beat;
+      const source = winAudio.createBufferSource();
+      const filter = winAudio.createBiquadFilter();
+      const level = winAudio.createGain();
+      source.buffer = noise;
+      filter.type = "bandpass";
+      filter.frequency.value = kind === "shuffle" ? 1100 : 2450;
+      filter.Q.value = kind === "shuffle" ? .8 : 4;
+      level.gain.setValueAtTime(kind === "shuffle" ? .15 : .10, time);
+      level.gain.exponentialRampToValueAtTime(.001, time + (kind === "shuffle" ? .07 : .026));
+      source.connect(filter).connect(level).connect(winVolume);
+      source.onended = () => { source.disconnect(); filter.disconnect(); level.disconnect(); };
+      source.start(time);
+    }
+  }).catch(() => {});
+}
 
 function celebrateWin(card, kind) {
   const layer = $("celebration");
@@ -293,6 +297,7 @@ $("shuffle").addEventListener("click", () => {
   if (["spin", "shuffle"].includes(phase) || mode !== "solo") return;
   reset();
   phase = "shuffle";
+  playMechanicSound("shuffle");
   render();
   $("phase").textContent = "正在洗牌 · 两轮";
   const gap =
@@ -632,7 +637,7 @@ reset();
 (() => {
   const pages = {
     privacy:
-      '<h1>隐私政策</h1><p class="notice">试玩版本说明 · 更新于 2026 年 11 月 13 日</p><h2>当前试玩版本</h2><p>选牌、演示金额和结果仅在当前页面内存中处理，刷新页面后重置。本站代码不设置分析追踪、不使用本地存储保存游戏记录，不向本站服务器提交钱包地址。</p><h2>网站访问</h2><p>网站由 Cloudflare 提供托管及网络服务。提供网页和保护服务所需的技术信息（例如 IP 地址、请求信息及设备信息）可能由服务提供商处理，具体以其政策为准。</p><h2>钱包与后续更新</h2><p>在你主动批准后，本站可通过 Jupiter、Phantom、Solflare 或 Backpack 获取公开钱包地址，用于页面显示和向 Solana 公共 RPC 请求 SOL 余额。RPC 提供商会接收地址和网络请求信息。本站不请求交易或签名。钱包服务商处理连接请求，适用其自身政策。邀请预览的金额及可选昵称包含在分享链接中，收到链接的人可以看到它们。真实账户、支付或数据收集启用前，将更新本政策并说明用途、保存期限及用户联系渠道。</p>',
+      '<h1>隐私政策</h1><p class="notice">试玩版本说明 · 更新于 2026 年 11 月 13 日</p><h2>当前试玩版本</h2><p>选牌、演示金额和结果仅在当前页面内存中处理，刷新页面后重置。浏览器会保存年龄确认和引导完成状态。本站代码不设置分析追踪、不使用本地存储保存游戏记录，不向本站服务器提交钱包地址。</p><h2>网站访问</h2><p>网站由 Cloudflare 提供托管及网络服务。提供网页和保护服务所需的技术信息（例如 IP 地址、请求信息及设备信息）可能由服务提供商处理，具体以其政策为准。</p><h2>钱包与后续更新</h2><p>在你主动批准后，本站可通过 Jupiter、Phantom、Solflare 或 Backpack 获取公开钱包地址，用于页面显示和向 Solana 公共 RPC 请求 SOL 余额。RPC 提供商会接收地址和网络请求信息。本站不请求交易或签名。钱包服务商处理连接请求，适用其自身政策。邀请预览的金额及可选昵称包含在分享链接中，收到链接的人可以看到它们。真实账户、支付或数据收集启用前，将更新本政策并说明用途、保存期限及用户联系渠道。</p>',
     terms:
       '<h1>服务条款</h1><p class="notice">试玩版本说明 · 更新于 2026 年 11 月 13 日</p><h2>服务范围</h2><p>龙桌当前提供免费的浏览器游戏界面试玩。演示金额不是资产、余额或奖金，不可充值、提现、兑换或转让。</p><h2>使用条件</h2><p>本体验仅面向年满 18 周岁的用户。请遵守你所在地适用的规则。不得利用本站攻击系统、干扰其他用户或冒充运营方。</p><h2>结果与可用性</h2><p>试玩结果在浏览器内产生，可被本地修改，不构成可验证的真实资金游戏。服务可能调整或暂停。本站不承诺任何收益。</p><h2>正式服务</h2><p>真实资金功能尚未开放。运营主体、适用地区、支付、争议处理与正式服务条款仍需确定。</p>',
     rules:
@@ -669,6 +674,8 @@ function selectSection(tab) {
     item.tabIndex = active ? 0 : -1;
     $(item.getAttribute("aria-controls")).hidden = !active;
   }
+  $("spin-history").hidden = tab.id !== "tab-flip";
+  maybeStartTour(tab.id);
 }
 sectionTabs.forEach((tab, index) => {
   tab.addEventListener("click", () => selectSection(tab));
@@ -735,7 +742,7 @@ flipSpin.addEventListener("click", async () => {
   const payout = flipPayouts();
   flipSpin.disabled = true;
   flipStake.disabled = true;
-  unlockWinSound();
+  playMechanicSound("spin");
   delete spinPanel.dataset.outcome;
   spinSparks.replaceChildren();
   spinResult.textContent = "正在旋转…";
@@ -763,6 +770,7 @@ flipSpin.addEventListener("click", async () => {
   flipSpin.textContent = middle ? "免费重转" : "再次旋转";
   flipStake.disabled = middle;
   flipSpin.disabled = false;
+  recordSpin(middle ? "平局 · 免费重转" : dragon ? "龙面 · 胜" : "火面 · 负", stakeCents, middle ? null : dragon ? payout.dragon : payout.fire);
   if (dragon) {
     showSpinVictory();
     playWinSound("dragon");
@@ -809,3 +817,161 @@ claimButton.addEventListener("click", () => {
   claimStatus.textContent = `试玩领取成功 · 返现 ${$("receipt-total").textContent} · 未发放资金`;
   claimButton.disabled = true;
 });
+
+
+for (const picker of document.querySelectorAll("[data-stake-picker]")) {
+  const input = $(picker.dataset.stakePicker);
+  const buttons = [...picker.querySelectorAll("button")];
+  function syncPicker() {
+    for (const button of buttons) {
+      button.disabled = input.disabled;
+      if (button.dataset.stake) {
+        button.setAttribute("aria-pressed", String(Number(button.dataset.stake) === Number(input.value)));
+      }
+    }
+  }
+  for (const button of buttons) {
+    button.addEventListener("click", () => {
+      if (input.disabled) return;
+      input.value = button.dataset.stake || input[button.dataset.limit];
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  }
+  input.addEventListener("input", syncPicker);
+  new MutationObserver(syncPicker).observe(input, { attributes: true, attributeFilter: ["disabled"] });
+  syncPicker();
+}
+
+function recordSpin(outcome, stakeCents, payout) {
+  const list = $("spin-history-list");
+  const item = document.createElement("li");
+  const stakeText = (stakeCents / 100).toFixed(2);
+  item.textContent = payout === null
+    ? `${outcome} · ${stakeText} USDC`
+    : `${outcome} · 下注 ${stakeText} USDC · 返还 ${payout} USDC`;
+  list.prepend(item);
+  if (list.children.length > 15) list.lastElementChild.remove();
+  $("spin-history-empty").hidden = true;
+}
+$("spin-history").addEventListener("click", () => $("spin-history-dialog").showModal());
+
+const tours = {
+  "tab-table": [
+    ["#stake-picker", "选择金额", "点击筹码选择金额，也可以手动输入。"],
+    ["#cards", "翻开一张牌", "先选一张牌，再点击确认下注。"],
+    ["#result", "查看本局结果", "翻牌结束后，这里会显示结果。"],
+  ],
+  "tab-flip": [
+    ["#flip-stake-picker", "选择金额", "点击筹码或输入你想试玩的金额。"],
+    ["#spin-actions", "开始旋转", "点击旋转。指针停在中线时，使用原金额免费重转。"],
+    ["#spin-history", "查看旋转记录", "这里可以回看本次访问中的试玩结果。"],
+  ],
+  "tab-cashback": [
+    [".eligibility-box", "查看返现资格", "先查看持币时长、资格和当前返现上限。"],
+    [".receipt-upload", "选择收据", "选择一份收据进行本地预览，再输入示例金额。"],
+    ["#claim-tour-target", "查看计算并领取", "查看示例返现金额，再点击领取返现（试玩）。"],
+  ],
+};
+
+const tour = $("game-tour");
+const spotlight = $("tour-spotlight");
+let activeTour;
+let tourIndex = 0;
+let tourTarget;
+const seenTours = new Set();
+
+function hasSeenTour(id) {
+  if (seenTours.has(id)) return true;
+  try { return localStorage.getItem("dragon-tour-v1:" + id) === "seen"; }
+  catch { return false; }
+}
+
+function positionTour() {
+  if (!tour.open || !tourTarget) return;
+  const rect = tourTarget.getBoundingClientRect();
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const left = Math.max(0, rect.left - 5);
+  const top = Math.max(0, rect.top - 5);
+  Object.assign(spotlight.style, {
+    left: left + "px",
+    top: top + "px",
+    width: Math.max(0, Math.min(width, rect.right + 5) - left) + "px",
+    height: Math.max(0, Math.min(height, rect.bottom + 5) - top) + "px",
+  });
+  const below = rect.bottom + 12;
+  const above = rect.top - tour.offsetHeight - 12;
+  const preferred = below + tour.offsetHeight < height ? below : above;
+  tour.style.top = Math.max(8, Math.min(height - tour.offsetHeight - 8, preferred)) + "px";
+}
+
+function showTourStep() {
+  const [selector, title, copy] = tours[activeTour][tourIndex];
+  tourTarget = document.querySelector(selector);
+  $("tour-title").textContent = title;
+  $("tour-copy").textContent = copy;
+  $("tour-progress").textContent = Array.from({ length: 3 }, (_, i) => i === tourIndex ? "●" : "○").join(" ");
+  $("tour-progress").setAttribute("aria-label", `第 ${tourIndex + 1} 步，共 3 步`);
+  $("tour-next").textContent = tourIndex === 2 ? "完成" : "下一步";
+  tourTarget.scrollIntoView({ block: "center", behavior: "instant" });
+  if (!tour.open) {
+    spotlight.hidden = false;
+    tour.showModal();
+  }
+  positionTour();
+}
+
+function maybeStartTour(id, replay = false) {
+  if ((!replay && hasSeenTour(id)) || document.querySelector("dialog[open]")) return;
+  activeTour = id;
+  tourIndex = 0;
+  showTourStep();
+}
+
+$("tour-next").addEventListener("click", () => {
+  if (tourIndex === 2) tour.close();
+  else { tourIndex++; showTourStep(); }
+});
+$("tour-skip").addEventListener("click", () => tour.close());
+tour.addEventListener("close", () => {
+  spotlight.hidden = true;
+  if (!activeTour) return;
+  seenTours.add(activeTour);
+  try { localStorage.setItem("dragon-tour-v1:" + activeTour, "seen"); } catch {}
+  activeTour = null;
+});
+window.addEventListener("resize", positionTour);
+window.addEventListener("scroll", positionTour, { passive: true });
+function activeTabId() {
+  return sectionTabs.find(tab => tab.getAttribute("aria-selected") === "true").id;
+}
+$("tutorial-open").addEventListener("click", () => maybeStartTour(activeTabId(), true));
+document.querySelectorAll("#wallet-dialog, #invite-dialog, #page-dialog").forEach(dialog => {
+  dialog.addEventListener("close", () => maybeStartTour(activeTabId()));
+});
+maybeStartTour("tab-table");
+}
+
+const ageGate = $("age-gate");
+ageGate.addEventListener("cancel", event => event.preventDefault());
+function enterSite() {
+  document.body.classList.remove("age-locked");
+  ageGate.close();
+  initializeGame();
+}
+let ageConfirmed = false;
+try { ageConfirmed = localStorage.getItem("dragon-age-confirmed-v1") === "yes"; }
+catch {}
+if (ageConfirmed) {
+  enterSite();
+} else {
+  $("age-no").addEventListener("click", () => {
+    $("age-warning").textContent = "访问已暂停。本网站仅供年满 18 周岁的用户使用。";
+    $("age-warning").classList.add("age-denied");
+  });
+  $("age-yes").addEventListener("click", () => {
+    try { localStorage.setItem("dragon-age-confirmed-v1", "yes"); } catch {}
+    enterSite();
+  });
+  ageGate.showModal();
+}
