@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#100402" />
     <title>龙桌 · 寻龙</title>
     <link rel="icon" type="image/png" href="dragon-avatar.png?v=original-1" />
-    <link rel="stylesheet" href="styles.css?v=ornate-11" />
-    <script defer src="app.js?v=ornate-11"></script>
+    <link rel="stylesheet" href="styles.css?v=spin-gold-12" />
+    <script defer src="app.js?v=spin-gold-12"></script>
     <link rel="preload" as="image" type="image/webp" href="card-cat.webp" />
     <link rel="preload" as="image" type="image/webp" href="card-dragon.webp" />
   </head>
@@ -84,16 +84,19 @@
         <section id="panel-flip" class="feature-panel" role="tabpanel" aria-labelledby="tab-flip" hidden>
           <p class="eyebrow">试玩预览 · 无真实下注</p>
           <h1>龙转</h1>
-          <div class="flip-wheel" aria-hidden="true">
+          <div class="flip-stage" aria-hidden="true">
+          <div class="flip-wheel">
             <div class="flip-half flip-dragon"><img src="dragon-avatar.webp" alt="" /><b>龙面 · 胜</b></div>
-            <div class="flip-half flip-fire"><span>🔥</span><b>火面 · 负</b></div>
+            <div class="flip-half flip-fire"><span class="spin-flame"></span><b>火面 · 负</b></div>
             <div class="flip-divider"></div><div id="flip-pointer"></div>
+          </div>
+          <div id="spin-sparks"></div>
           </div>
           <label class="receipt-label" for="flip-stake">试玩下注金额（USDC）</label>
           <input id="flip-stake" type="number" inputmode="decimal" min="0.05" max="1000000" step="0.01" value="5.00" required aria-describedby="flip-payout" />
           <p id="flip-payout" class="feature-muted">龙面返还 10.00 USDC · 火面返还 1.00 USDC</p>
           <p class="feature-muted">平局保留原金额，可免费重转</p>
-          <p id="flip-result" role="status">点击旋转开始试玩</p>
+          <p id="flip-result" class="spin-result" role="status">点击旋转开始试玩</p>
           <button id="flip-spin" type="button" class="primary">旋转</button>
         </section>
         <section id="panel-cashback" class="feature-panel" role="tabpanel" aria-labelledby="tab-cashback" hidden>

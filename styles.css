@@ -1473,3 +1473,74 @@ input[hidden] {
 .receipt-upload:has(+ .receipt-file-input:focus-visible) { outline: 2px solid #ffdf94; outline-offset: 3px; }
 #receipt-file-status { overflow-wrap: anywhere; }
 @keyframes section-arrive { from { transform: translateX(10px); opacity: .6; } to { transform: none; opacity: 1; } }
+
+/* Stepped corners from the mockup: a gold edge with a dark inset. */
+.scene #wallet,
+.section-tabs,
+.feature-panel .primary,
+.spin-result,
+.feature-box {
+  --ornate-cut: polygon(9px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 9px 100%, 0 calc(100% - 9px), 0 9px);
+  --ornate-fill: linear-gradient(#41210e, #170704);
+  position: relative;
+  isolation: isolate;
+  clip-path: var(--ornate-cut);
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: linear-gradient(125deg, #865322, #ffdf8b 22%, #a36426 47%, #ffe1a1 75%, #9a5a24);
+  box-shadow: none;
+}
+.scene #wallet::before,
+.section-tabs::before,
+.feature-panel .primary::before,
+.spin-result::before,
+.feature-box::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  clip-path: var(--ornate-cut);
+  background: var(--ornate-fill);
+  z-index: -1;
+  pointer-events: none;
+}
+.section-tabs { --ornate-fill: linear-gradient(#210e06, #110503); }
+.section-tabs [aria-selected="true"],
+.feature-panel .primary { --ornate-fill: linear-gradient(#781d0e, #4d0b06 55%, #290603); }
+.section-tabs [aria-selected="true"] { background: var(--ornate-fill); }
+.feature-box { --ornate-fill: linear-gradient(#37160b, #200b06); }
+.eligibility-box { --ornate-fill: linear-gradient(90deg,#270f09 28%,#270f09d0),url(dragon-avatar.webp) right center/140px auto no-repeat; }
+.spin-result { padding: 12px 10px; color: #ffe6ad; font-weight: 700; }
+[data-outcome="fire"] .spin-result { --ornate-fill: linear-gradient(#7c2410, #350804); }
+[data-outcome="dragon"] .spin-result { --ornate-fill: linear-gradient(#78501a, #3c2007); }
+.flip-stage { position: relative; width: min(320px, 100%); margin-inline: auto; }
+.flip-wheel { width: 100%; border: 13px solid #b87b32; }
+.flip-wheel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 6px solid transparent;
+  border-radius: 50%;
+  background: repeating-conic-gradient(#f6cb75 0deg 2deg, #7b4419 2deg 4deg, #d4994c 4deg 6deg) border-box;
+  mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+  z-index: 1;
+}
+.flip-dragon { background: radial-gradient(ellipse at 50% 32%, #6e491a, #261107 78%); }
+.flip-dragon img { width: clamp(76px, 23vw, 122px); object-fit: contain; mix-blend-mode: screen; border-radius: 0; }
+.flip-fire { background: radial-gradient(ellipse at 50% 22%, #6e200c, #360803 74%); }
+.flip-fire .spin-flame {
+  display: block;
+  width: clamp(48px, 17vw, 78px);
+  height: clamp(51px, 18vw, 82px);
+  background: linear-gradient(150deg,#fff1a8 12%,#e6ae4e 35%,#bd7326 56%,#ffde79 78%,#9c571c);
+  clip-path: polygon(55% 0, 61% 12%, 64% 25%, 59% 38%, 48% 49%, 47% 59%, 59% 59%, 72% 49%, 81% 34%, 89% 48%, 94% 67%, 91% 79%, 82% 90%, 68% 97%, 63% 84%, 67% 72%, 53% 78%, 46% 91%, 51% 100%, 31% 95%, 17% 84%, 10% 70%, 10% 56%, 19% 42%, 29% 33%, 26% 48%, 29% 56%, 37% 50%, 42% 39%, 39% 25%, 48% 17%);
+}
+#flip-pointer { z-index: 2; }
+.flip-wheel::after { z-index: 3; box-shadow: 0 0 0 2px #865020, 0 0 8px #ffdb8a; }
+[data-outcome="dragon"] .flip-wheel { box-shadow: 0 0 22px #e3983499, inset 0 0 0 1px #ffdc85; }
+[data-outcome="dragon"] .flip-dragon { background: radial-gradient(ellipse at center, #a27125, #302005 85%); }
+[data-outcome="dragon"] .flip-dragon img { animation: dragon-victory 850ms ease-out both; }
+#spin-sparks { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+#spin-sparks i { position: absolute; left: 50%; top: 30%; width: 6px; height: 6px; background: #ffe6a4; box-shadow: 0 0 9px #ffc44d; opacity: 0; animation: spin-victory-spark 900ms var(--spark-delay) ease-out both; }
+@keyframes dragon-victory { 0%, 100% { transform: scale(1); } 38% { transform: scale(1.12); filter: brightness(1.45); } }
+@keyframes spin-victory-spark { 0% { opacity: 1; transform: translate(0,0) rotate(45deg); } 100% { opacity: 0; transform: translate(var(--spark-x),var(--spark-y)) rotate(190deg); } }

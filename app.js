@@ -684,6 +684,25 @@ sectionTabs.forEach((tab, index) => {
 const flipSpin = $("flip-spin");
 const flipPointer = $("flip-pointer");
 const flipStake = $("flip-stake");
+const spinPanel = $("panel-flip");
+const spinSparks = $("spin-sparks");
+const spinResult = $("flip-result");
+
+function showSpinVictory() {
+  spinPanel.dataset.outcome = "dragon";
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const particles = document.createDocumentFragment();
+  for (let index = 0; index < 18; index++) {
+    const angle = (Math.PI * 2 * index) / 18;
+    const distance = 70 + (index % 4) * 22;
+    const spark = document.createElement("i");
+    spark.style.setProperty("--spark-x", `${Math.cos(angle) * distance}px`);
+    spark.style.setProperty("--spark-y", `${Math.sin(angle) * distance}px`);
+    spark.style.setProperty("--spark-delay", `${(index % 5) * 28}ms`);
+    particles.append(spark);
+  }
+  spinSparks.replaceChildren(particles);
+}
 let flipAngle = -90;
 let retryStakeCents = null;
 
@@ -717,7 +736,9 @@ flipSpin.addEventListener("click", async () => {
   flipSpin.disabled = true;
   flipStake.disabled = true;
   unlockWinSound();
-  $("flip-result").textContent = "正在旋转…";
+  delete spinPanel.dataset.outcome;
+  spinSparks.replaceChildren();
+  spinResult.textContent = "正在旋转…";
 
   const roll = spinRandomInt(100);
   const dragon = roll < 37;
@@ -734,7 +755,7 @@ flipSpin.addEventListener("click", async () => {
   flipAngle = landingAngle;
   flipPointer.style.transform = `rotate(${flipAngle}deg)`;
   retryStakeCents = middle ? stakeCents : null;
-  $("flip-result").textContent = middle
+  spinResult.textContent = middle
     ? `平局 · 保留 ${(stakeCents / 100).toFixed(2)} USDC，免费重转`
     : dragon
       ? `龙面 · 试玩返还 ${payout.dragon} USDC`
@@ -742,7 +763,12 @@ flipSpin.addEventListener("click", async () => {
   flipSpin.textContent = middle ? "免费重转" : "再次旋转";
   flipStake.disabled = middle;
   flipSpin.disabled = false;
-  if (dragon) playWinSound("dragon");
+  if (dragon) {
+    showSpinVictory();
+    playWinSound("dragon");
+  } else {
+    spinPanel.dataset.outcome = middle ? "middle" : "fire";
+  }
 });
 
 const receiptAmount = $("receipt-amount");
