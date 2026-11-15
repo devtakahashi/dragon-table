@@ -115,6 +115,80 @@ function reset() {
   $("result").textContent = "选牌后确认，揭晓你的运气。";
   render();
 }
+const winSoundButton = $("win-sound");
+let winSoundEnabled = true;
+try {
+  winSoundEnabled = localStorage.getItem("dragon-table-win-sound") !== "off";
+} catch {
+  // The toggle can still work for this page when storage is unavailable.
+}
+let winAudio;
+let winVolume;
+
+function updateWinSoundButton() {
+  winSoundButton.textContent = winSoundEnabled ? "胜利音效：开" : "胜利音效：关";
+  winSoundButton.setAttribute("aria-pressed", String(winSoundEnabled));
+  if (winVolume) winVolume.gain.value = winSoundEnabled ? 0.30 : 0;
+}
+
+function unlockWinSound() {
+  if (!winSoundEnabled) return;
+  const Audio = window.AudioContext || window.webkitAudioContext;
+  if (!Audio) return;
+  try {
+    if (!winAudio) {
+      winAudio = new Audio();
+      winVolume = winAudio.createGain();
+      winVolume.gain.value = 0.30;
+      winVolume.connect(winAudio.destination);
+    }
+    // Resume inside the tap, before the asynchronous card reveal.
+    if (winAudio.state !== "running") winAudio.resume().catch(() => {});
+  } catch {
+    // Audio is optional; a browser audio error must not interrupt the round.
+  }
+}
+
+function playWinSound(kind) {
+  if (!winSoundEnabled || winAudio?.state !== "running" || !winVolume) return;
+  const melody = kind === "cat" ? [67, 69, 72, 76] : [60, 64, 67, 69, 72, 76];
+  const start = winAudio.currentTime + 0.02;
+  melody.forEach((note, index) => {
+    const time = start + index * 0.17;
+    const frequency = 440 * 2 ** ((note - 69) / 12);
+    // A short plucked tone with quickly decaying upper partials.
+    [1, 2, 3].forEach((partial) => {
+      const voice = winAudio.createOscillator();
+      const envelope = winAudio.createGain();
+      const decay = partial === 1 ? 0.42 : 0.17;
+      voice.frequency.value = frequency * partial;
+      envelope.gain.setValueAtTime(0.0001, time);
+      envelope.gain.exponentialRampToValueAtTime(0.28 / partial ** 2, time + 0.008);
+      envelope.gain.exponentialRampToValueAtTime(0.0001, time + decay);
+      voice.connect(envelope);
+      envelope.connect(winVolume);
+      voice.onended = () => {
+        voice.disconnect();
+        envelope.disconnect();
+      };
+      voice.start(time);
+      voice.stop(time + decay + 0.01);
+    });
+  });
+}
+
+winSoundButton.addEventListener("click", () => {
+  winSoundEnabled = !winSoundEnabled;
+  try {
+    localStorage.setItem("dragon-table-win-sound", winSoundEnabled ? "on" : "off");
+  } catch {
+    // The current page still respects the toggle.
+  }
+  updateWinSoundButton();
+  unlockWinSound();
+});
+updateWinSoundButton();
+
 function celebrateWin(card, kind) {
   const layer = $("celebration");
   card.dataset.win = kind;
@@ -147,6 +221,7 @@ $("action").addEventListener("click", () => {
   }
   if (phase !== "choose" || selected === null || !valid() || mode !== "solo")
     return;
+  unlockWinSound();
   stake = Number($("stake").value);
   phase = "spin";
   cards[selected].classList.add("spinning");
@@ -179,6 +254,7 @@ $("action").addEventListener("click", () => {
       $("result").textContent =
         `${selected === cat ? "遇见猫师傅！" : "寻龙成功！"}演示金额 ${stake.toFixed(2)} USDC · 奖金倍率待定`;
       celebrateWin(b, isCat ? "cat" : "dragon");
+      playWinSound(isCat ? "cat" : "dragon");
     } else {
       window.demoStats.loss++;
       face.innerHTML = '<b aria-hidden="true">😭</b><small>与龙擦肩</small>';
